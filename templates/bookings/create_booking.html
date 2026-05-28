@@ -1,0 +1,71 @@
+<!-- D:\cafeteria_irazu_proyecto\cafeteria_irazu\templates\bookings\create_booking.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Reservar Mesa — Cafetería Irazú{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-espresso pt-32 pb-32">
+    <div class="max-w-2xl mx-auto px-6">
+        <div class="text-center mb-12">
+            <div class="font-body text-xs text-latte tracking-[0.4em] uppercase mb-4">Aparta tu lugar</div>
+            <h1 class="font-display text-5xl md:text-6xl text-crema mb-4">📅 Reservar</h1>
+            <p class="font-body text-crema/50">Te esperamos con una mesa lista para ti</p>
+        </div>
+
+        <div class="bg-white/5 border border-latte/20 rounded-2xl p-6 md:p-8">
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                
+                {% for field in form %}
+                <div>
+                    <label class="block font-body text-crema mb-2">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                    <p class="text-red-400 text-sm mt-1">{{ field.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                
+                <button type="submit" class="w-full bg-latte text-espresso py-3 rounded-xl font-semibold hover:bg-latte/80 transition text-lg">
+                    Confirmar Reserva
+                </button>
+            </form>
+            
+            <div class="mt-6 text-center text-crema/40 text-sm">
+                <p>📞 ¿Prefieres llamar? <span class="text-latte">6353-1551</span></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    input, select, textarea {
+        width: 100%;
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(196, 149, 106, 0.3);
+        border-radius: 12px;
+        padding: 12px 16px;
+        color: #fdf6ee;
+        font-family: 'Jost', sans-serif;
+        transition: all 0.3s;
+    }
+    
+    input:focus, select:focus, textarea:focus {
+        outline: none;
+        border-color: #c4956a;
+        background: rgba(255,255,255,0.15);
+    }
+    
+    input[type="date"], input[type="time"] {
+        color-scheme: dark;
+    }
+    
+    label {
+        display: block;
+        margin-bottom: 8px;
+        color: #c4956a;
+        font-weight: 500;
+    }
+</style>
+{% endblock %}

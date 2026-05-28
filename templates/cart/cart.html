@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Carrito — Cafetería Irazú{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-espresso pt-24 pb-32">
+    <div class="max-w-4xl mx-auto px-6">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <div class="font-body text-xs text-latte tracking-[0.4em] uppercase mb-4">Tu selección</div>
+            <h1 class="font-display text-5xl md:text-6xl text-crema mb-4">🛒 Tu Carrito</h1>
+            <p class="font-body text-crema/50">Revisa tu pedido antes de confirmar</p>
+        </div>
+
+        {% if cart and cart.items.all %}
+        <!-- Lista de productos -->
+        <div class="bg-white/5 border border-latte/20 rounded-2xl overflow-hidden mb-8">
+            {% for item in cart.items.all %}
+            <div class="flex flex-col md:flex-row items-center gap-4 p-6 border-b border-latte/20 last:border-0 hover:bg-white/5 transition">
+                <!-- Imagen -->
+                <div class="w-20 h-20 rounded-xl overflow-hidden bg-gradient-to-br from-cafe/50 to-espresso flex-shrink-0">
+                    {% if item.product.image %}
+                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="w-full h-full object-cover">
+                    {% else %}
+                    <div class="w-full h-full flex items-center justify-center text-3xl">☕</div>
+                    {% endif %}
+                </div>
+                
+                <!-- Info producto -->
+                <div class="flex-grow text-center md:text-left">
+                    <h3 class="font-display text-lg text-crema">{{ item.product.name }}</h3>
+                    <p class="font-body text-sm text-crema/50">₡{{ item.product.price|floatformat:0 }} c/u</p>
+                </div>
+                
+                <!-- Cantidad y precio -->
+                <div class="flex items-center gap-4">
+                    <form method="post" action="{% url 'cart:update_cart' item.id %}" class="update-form flex items-center gap-2" data-item-id="{{ item.id }}">
+                        {% csrf_token %}
+                        <button type="button" class="decr-btn w-8 h-8 rounded-full bg-latte/20 text-crema hover:bg-latte/30 transition text-lg">−</button>
+                        <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="10" 
+                               class="quantity-input w-16 text-center bg-white/10 text-crema border border-latte/30 rounded-lg py-1 focus:outline-none focus:border-latte">
+                        <button type="button" class="incr-btn w-8 h-8 rounded-full bg-latte/20 text-crema hover:bg-latte/30 transition text-lg">+</button>
+                        <button type="submit" class="update-btn hidden">Actualizar</button>
+                    </form>
+                    
+                    <div class="font-display text-xl text-latte min-w-[100px] text-right">
+                        ₡{{ item.get_subtotal|floatformat:0 }}
+                    </div>
+                    
+                    <form method="post" action="{% url 'cart:remove_from_cart' item.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="text-crema/30 hover:text-red-400 transition text-xl">✖</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Resumen -->
+        <div class="bg-white/5 border border-latte/20 rounded-2xl p-6 md:p-8">
+            {% with subtotal=cart.get_total service_charge=cart.get_total|divisibleby:10 %}
+            <div class="flex justify-between items-center mb-4 pb-4 border-b border-latte/20">
+                <span class="font-body text-crema/70">Subtotal</span>
+                <span class="font-display text-xl text-crema">₡{{ subtotal|floatformat:0 }}</span>
+            </div>
+            <div class="flex justify-between items-center mb-6 pb-4 border-b border-latte/20">
+                <span class="font-body text-crema/70">Servicio (+10%)</span>
+                <span class="font-display text-crema">₡{{ service_charge|floatformat:0 }}</span>
+            </div>
+            <div class="flex justify-between items-center mb-8">
+                <span class="font-display text-2xl text-crema">Total</span>
+                <span class="font-display text-3xl text-latte">₡{{ subtotal|add:service_charge|floatformat:0 }}</span>
+            </div>
+            {% endwith %}
+            
+            <div class="flex flex-col sm:flex-row gap-4">
+                <a href="{% url 'menu' %}" class="flex-1 text-center px-6 py-3 border-2 border-latte/50 text-crema rounded-xl hover:bg-white/5 transition font-semibold">
+                    ← Seguir Comprando
+                </a>
+                <a href="{% url 'payments:checkout' %}" class="flex-1 text-center bg-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-700 transition shadow-lg shadow-green-600/20">
+                    Proceder al Pago →
+                </a>
+            </div>
+        </div>
+        
+        {% else %}
+        <!-- Carrito vacío -->
+        <div class="text-center py-20">
+            <div class="text-6xl mb-6">🛒</div>
+            <h2 class="font-display text-2xl text-crema mb-4">Tu carrito está vacío</h2>
+            <p class="font-body text-crema/50 mb-8">¡Agrega algunos de nuestros deliciosos productos!</p>
+            <a href="{% url 'menu' %}" class="inline-block bg-latte text-espresso px-8 py-3 rounded-xl font-semibold hover:bg-latte/80 transition">
+                Ver Menú ☕
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Manejar incremento/decremento de cantidad
+    document.querySelectorAll('.update-form').forEach(form => {
+        const decrBtn = form.querySelector('.decr-btn');
+        const incrBtn = form.querySelector('.incr-btn');
+        const quantityInput = form.querySelector('.quantity-input');
+        
+        const updateQuantity = async (newQuantity) => {
+            if (newQuantity < 1) newQuantity = 1;
+            if (newQuantity > 10) newQuantity = 10;
+            quantityInput.value = newQuantity;
+            
+            const formData = new FormData();
+            formData.append('quantity', newQuantity);
+            formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+            
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                
+                if (response.ok) {
+                    location.reload();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        };
+        
+        decrBtn?.addEventListener('click', () => {
+            let val = parseInt(quantityInput.value) || 1;
+            updateQuantity(val - 1);
+        });
+        
+        incrBtn?.addEventListener('click', () => {
+            let val = parseInt(quantityInput.value) || 1;
+            updateQuantity(val + 1);
+        });
+        
+        quantityInput?.addEventListener('change', () => {
+            let val = parseInt(quantityInput.value) || 1;
+            updateQuantity(val);
+        });
+    });
+});
+</script>
+{% endblock %}

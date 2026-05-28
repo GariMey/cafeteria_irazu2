@@ -1,0 +1,80 @@
+{% load static %}
+<nav id="navbar" class="fixed top-0 left-0 right-0 z-40 transition-all duration-500 py-5">
+    <div class="max-w-6xl mx-auto px-6 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-3 group">
+            <div class="w-10 h-10 rounded-full bg-latte/20 border border-latte/40 flex items-center justify-center group-hover:bg-latte/30 transition-colors">
+                <span class="text-xl">☕</span>
+            </div>
+            <div class="leading-tight">
+                <div class="font-display text-xl font-semibold text-crema tracking-wide">Cafetería</div>
+                <div class="font-body text-xs text-latte tracking-[0.2em] uppercase">Irazú</div>
+            </div>
+        </a>
+        
+        <!-- Menú Desktop -->
+        <div class="hidden md:flex items-center gap-6">
+            <a href="/#nosotros" class="font-body text-sm text-crema/80 hover:text-crema tracking-wider uppercase transition-colors">Nosotros</a>
+            <a href="/menu/" class="font-body text-sm text-latte hover:text-crema tracking-wider uppercase transition-colors">
+                Menú 
+            </a>
+            <a href="/#galeria" class="font-body text-sm text-crema/80 hover:text-crema tracking-wider uppercase transition-colors">Galería</a>
+            <a href="/#experiencia" class="font-body text-sm text-crema/80 hover:text-crema tracking-wider uppercase transition-colors">Experiencia</a>
+            <a href="/#contacto" class="font-body text-sm text-crema/80 hover:text-crema tracking-wider uppercase transition-colors">Contacto</a>
+            
+            <!-- Carrito -->
+            <a href="{% url 'cart:cart' %}" class="relative group">
+                <svg class="w-5 h-5 text-crema/80 hover:text-latte transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.5 6.5M17 13l1.5 6.5M9 21h6M12 18v3"></path>
+                </svg>
+                {% if cart_count > 0 %}
+                <span class="absolute -top-2 -right-3 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold animate-pulse">
+                    {{ cart_count }}
+                </span>
+                {% endif %}
+            </a>
+            
+            <!-- Reservas -->
+            <a href="{% url 'bookings:create_booking' %}" class="font-body text-sm bg-latte/20 hover:bg-latte/30 border border-latte/40 text-crema px-4 py-2 rounded-full transition-all hover:scale-105">
+                📅 Reservar
+            </a>
+            
+            <!-- Teléfono -->
+            <a href="tel:+50663531551" class="font-body text-sm bg-latte/20 hover:bg-latte/30 border border-latte/40 text-crema px-4 py-2 rounded-full transition-all hover:scale-105">
+                📞 6353-1551
+            </a>
+        </div>
+        
+        <button id="mobile-menu-btn" class="md:hidden text-crema p-2 flex flex-col gap-1.5">
+            <span class="block w-6 h-0.5 bg-crema transition-all"></span>
+            <span class="block w-6 h-0.5 bg-crema transition-all"></span>
+            <span class="block w-4 h-0.5 bg-crema transition-all"></span>
+        </button>
+    </div>
+    
+    <!-- Menú Mobile -->
+    <div id="mobile-menu" class="hidden md:hidden bg-espresso/95 backdrop-blur-sm border-t border-latte/20 mt-3">
+        <div class="px-6 py-6 flex flex-col gap-4">
+            <a href="/#nosotros" class="font-body text-sm text-crema/80 hover:text-latte tracking-wider uppercase py-2 border-b border-latte/10">Nosotros</a>
+            <a href="/#menu" class="font-body text-sm text-crema/80 hover:text-latte tracking-wider uppercase py-2 border-b border-latte/10">Menú</a>
+            <a href="/menu/" class="font-body text-sm text-latte hover:text-crema tracking-wider uppercase py-2 border-b border-latte/10">📋 Menú Completo</a>
+            <a href="/#galeria" class="font-body text-sm text-crema/80 hover:text-latte tracking-wider uppercase py-2 border-b border-latte/10">Galería</a>
+            <a href="/#experiencia" class="font-body text-sm text-crema/80 hover:text-latte tracking-wider uppercase py-2 border-b border-latte/10">Experiencia</a>
+            <a href="/#contacto" class="font-body text-sm text-crema/80 hover:text-latte tracking-wider uppercase py-2 border-b border-latte/10">Contacto</a>
+            
+            <!-- Carrito móvil -->
+            <a href="{% url 'cart:cart' %}" class="flex items-center justify-between font-body text-sm text-crema/80 hover:text-latte tracking-wider uppercase py-2 border-b border-latte/10">
+                <span>🛒 Carrito</span>
+                {% if cart_count > 0 %}
+                <span class="bg-red-500 text-white text-xs rounded-full px-2 py-0.5">{{ cart_count }}</span>
+                {% endif %}
+            </a>
+            
+            <!-- Reservas móvil -->
+            <a href="{% url 'bookings:create_booking' %}" class="font-body text-sm text-crema/80 hover:text-latte tracking-wider uppercase py-2 border-b border-latte/10">
+                📅 Reservar Mesa
+            </a>
+            
+            <a href="tel:+50663531551" class="font-body text-sm text-latte mt-2">📞 6353-1551</a>
+        </div>
+    </div>
+</nav>

@@ -1,0 +1,67 @@
+<!-- templates/bookings/dashboard.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="min-h-screen bg-espresso pt-32 pb-32">
+    <div class="max-w-6xl mx-auto px-6">
+        <h1 class="font-display text-4xl text-crema mb-8">📅 Reservas Recibidas</h1>
+        
+        <div class="bg-white/5 border border-latte/20 rounded-2xl overflow-hidden">
+            <table class="w-full">
+                <thead class="bg-latte/20">
+                    <tr>
+                        <th class="text-left p-4 text-crema">Cliente</th>
+                        <th class="text-left p-4 text-crema">Fecha/Hora</th>
+                        <th class="text-left p-4 text-crema">Personas</th>
+                        <th class="text-left p-4 text-crema">Estado</th>
+                        <th class="text-left p-4 text-crema">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for reservation in reservations %}
+                    <tr class="border-b border-latte/20">
+                        <td class="p-4 text-crema/80">
+                            {{ reservation.customer_name }}<br>
+                            <small class="text-crema/40">{{ reservation.customer_email }}</small>
+                        </td>
+                        <td class="p-4 text-crema/80">
+                            {{ reservation.date }}<br>
+                            <small class="text-crema/40">{{ reservation.time }}</small>
+                        </td>
+                        <td class="p-4 text-crema/80">{{ reservation.guests }}</td>
+                        <td class="p-4">
+                            <span class="px-2 py-1 rounded-full text-xs 
+                                {% if reservation.status == 'confirmed' %}bg-green-500/20 text-green-300
+                                {% elif reservation.status == 'pending' %}bg-yellow-500/20 text-yellow-300
+                                {% elif reservation.status == 'cancelled' %}bg-red-500/20 text-red-300
+                                {% else %}bg-blue-500/20 text-blue-300{% endif %}">
+                                {{ reservation.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="p-4">
+                            <a href="/admin/bookings/reservation/{{ reservation.id }}/change/" 
+                               class="text-latte hover:text-crema text-sm">
+                                Ver Detalles →
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="p-8 text-center text-crema/40">
+                            No hay reservas todavía
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="mt-8 text-center">
+            <a href="/admin/bookings/reservation/" 
+               class="inline-block bg-latte text-espresso px-6 py-3 rounded-full font-semibold hover:bg-latte/80 transition">
+                Gestionar Reservas en Admin →
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

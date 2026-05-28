@@ -1,0 +1,25 @@
+<!-- D:\cafeteria_irazu_proyecto\cafeteria_irazu\templates\bookings\success.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="min-h-screen bg-espresso pt-32 pb-32 flex items-center justify-center">
+    <div class="text-center max-w-2xl mx-auto px-6">
+        <div class="text-8xl mb-6">✅</div>
+        <h1 class="font-display text-4xl md:text-5xl text-crema mb-4">¡Reserva Confirmada!</h1>
+        <p class="font-body text-crema/60 text-lg mb-4">
+            Hemos recibido tu reserva. Te esperamos en Cafetería Irazú.
+        </p>
+        <p class="font-body text-crema/40 mb-8">
+            Recibirás un correo de confirmación en tu bandeja de entrada.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="{% url 'home' %}" class="inline-block bg-latte text-espresso px-8 py-3 rounded-full font-semibold hover:bg-latte/80 transition">
+                Volver al Inicio
+            </a>
+            <a href="{% url 'menu' %}" class="inline-block border border-latte/50 text-crema px-8 py-3 rounded-full font-semibold hover:bg-white/10 transition">
+                Ver Menú ☕
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

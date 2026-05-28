@@ -1,0 +1,521 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<!-- ═══════════════════════════════════════ HERO ═══════════════════════════════════════ -->
+<section id="hero" class="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <!-- Mountain landscape SVG background -->
+    <div class="absolute inset-0 bg-gradient-to-b from-espresso via-cafe to-mocha">
+        <!-- Atmospheric mist layers -->
+        <div class="absolute inset-0" style="background: radial-gradient(ellipse at 50% 60%, rgba(61,31,0,0.6) 0%, transparent 70%)"></div>
+        <!-- Mountain silhouettes via CSS -->
+        <svg class="absolute bottom-0 left-0 right-0 w-full" viewBox="0 0 1440 400" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="mountainGrad1" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:#1a2e1a;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#0d1a0d;stop-opacity:1" />
+                </linearGradient>
+                <linearGradient id="mountainGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:#243324;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#0d1a0d;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+            <!-- Back mountains -->
+            <path d="M0,280 L80,180 L160,220 L240,140 L320,180 L400,100 L500,160 L600,80 L700,130 L800,70 L900,120 L1000,60 L1100,110 L1200,80 L1300,140 L1380,120 L1440,150 L1440,400 L0,400Z" fill="url(#mountainGrad1)" opacity="0.7"/>
+            <!-- Front mountains -->
+            <path d="M0,350 L100,260 L200,300 L320,220 L420,270 L540,200 L660,250 L760,190 L880,240 L980,180 L1100,230 L1200,200 L1320,260 L1440,230 L1440,400 L0,400Z" fill="url(#mountainGrad2)"/>
+            <!-- Pine trees suggestion -->
+            <path d="M0,400 L30,340 L60,400 M100,400 L130,330 L160,400 M200,400 L235,320 L270,400 M320,400 L355,335 L390,400 M1080,400 L1110,330 L1140,400 M1180,400 L1215,320 L1250,400 M1300,400 L1330,335 L1360,400" stroke="#1a2e1a" stroke-width="2" fill="none"/>
+        </svg>
+        <!-- Stars/particles -->
+        <div class="absolute top-20 left-1/4 w-1 h-1 bg-crema/30 rounded-full animate-pulse"></div>
+        <div class="absolute top-32 right-1/3 w-0.5 h-0.5 bg-crema/20 rounded-full animate-pulse" style="animation-delay:1s"></div>
+        <div class="absolute top-16 right-1/4 w-1 h-1 bg-latte/20 rounded-full animate-pulse" style="animation-delay:2s"></div>
+    </div>
+
+    <!-- Mist overlay -->
+    <div class="absolute inset-0" style="background: linear-gradient(to bottom, rgba(26,15,0,0.3) 0%, transparent 40%, rgba(26,15,0,0.5) 100%)"></div>
+
+    <!-- Hero content -->
+    <div class="relative z-10 text-center px-6 max-w-4xl mx-auto hero-content">
+        <div class="inline-block font-body text-xs text-latte tracking-[0.4em] uppercase mb-8 border border-latte/30 px-6 py-2 rounded-full backdrop-blur-sm bg-white/5 fade-in-up" style="animation-delay:0.2s">
+            ✦ Cartago, Costa Rica · Camino al Irazú ✦
+        </div>
+        <h1 class="font-display text-5xl md:text-7xl lg:text-8xl text-crema leading-tight mb-6 fade-in-up" style="animation-delay:0.4s">
+            Un rincón cálido<br>
+            <em class="text-latte">entre las montañas</em>
+        </h1>
+        <p class="font-body text-base md:text-lg text-crema/70 max-w-2xl mx-auto mb-10 leading-relaxed fade-in-up" style="animation-delay:0.6s">
+            Café artesanal, comida deliciosa y una experiencia inolvidable<br class="hidden md:block"> camino al volcán Irazú.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center fade-in-up" style="animation-delay:0.8s">
+            <a href="#menu" class="btn-primary font-body text-sm tracking-wider uppercase px-8 py-4 bg-latte text-espresso rounded-full hover:bg-crema transition-all duration-300 hover:scale-105 shadow-lg shadow-latte/20">
+                Ver Menú
+            </a>
+            <a href="#contacto" class="btn-secondary font-body text-sm tracking-wider uppercase px-8 py-4 border border-crema/40 text-crema rounded-full hover:bg-white/10 transition-all duration-300 backdrop-blur-sm">
+                Cómo Llegar
+            </a>
+        </div>
+
+        <!-- Stats bar -->
+        <div class="mt-16 flex flex-wrap gap-8 justify-center fade-in-up" style="animation-delay:1s">
+            <div class="text-center">
+                <div class="font-display text-3xl text-latte">4.5★</div>
+                <div class="font-body text-xs text-crema/50 tracking-wider uppercase mt-1">Calificación</div>
+            </div>
+            <div class="w-px bg-latte/20 hidden sm:block"></div>
+            <div class="text-center">
+                <div class="font-display text-3xl text-latte">380+</div>
+                <div class="font-body text-xs text-crema/50 tracking-wider uppercase mt-1">Opiniones</div>
+            </div>
+            <div class="w-px bg-latte/20 hidden sm:block"></div>
+            <div class="text-center">
+                <div class="font-display text-3xl text-latte">Pet</div>
+                <div class="font-body text-xs text-crema/50 tracking-wider uppercase mt-1">Friendly</div>
+            </div>
+            <div class="w-px bg-latte/20 hidden sm:block"></div>
+            <div class="text-center">
+                <div class="font-display text-3xl text-latte">🏔️</div>
+                <div class="font-body text-xs text-crema/50 tracking-wider uppercase mt-1">Vista montaña</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scroll indicator -->
+    <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-bounce">
+        <div class="font-body text-xs text-crema/40 tracking-widest uppercase">Descubrir</div>
+        <div class="w-px h-8 bg-gradient-to-b from-crema/30 to-transparent"></div>
+    </div>
+</section>
+
+
+<!-- ═══════════════════════════════════ NOSOTROS ═══════════════════════════════════════ -->
+<section id="nosotros" class="py-24 md:py-32 bg-beige">
+    <div class="max-w-6xl mx-auto px-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <!-- Left: visual -->
+            <div class="relative">
+                <!-- Main art box -->
+                <div class="aspect-[4/5] rounded-2xl overflow-hidden bg-gradient-to-br from-mocha to-cafe flex items-center justify-center relative">
+                    <!-- Coffee cup illustration via SVG -->
+                    <svg viewBox="0 0 300 300" class="w-64 h-64 opacity-20" xmlns="http://www.w3.org/2000/svg">
+                        <ellipse cx="150" cy="220" rx="80" ry="15" fill="#c4956a"/>
+                        <rect x="80" y="130" width="140" height="90" rx="10" fill="#c4956a"/>
+                        <path d="M220,150 Q260,150 260,175 Q260,200 220,200" stroke="#c4956a" stroke-width="10" fill="none"/>
+                        <ellipse cx="150" cy="130" rx="70" ry="15" fill="#f5e6d3" opacity="0.5"/>
+                        <path d="M130,110 Q140,80 150,110 Q160,80 170,110" stroke="#f5e6d3" stroke-width="3" fill="none" opacity="0.6"/>
+                    </svg>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <div class="text-center text-crema">
+                            <div class="text-8xl mb-4">☕</div>
+                            <div class="font-display text-2xl italic">con amor</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Floating badge -->
+                <div class="absolute -bottom-6 -right-6 bg-verde text-crema rounded-2xl p-6 shadow-2xl">
+                    <div class="font-display text-4xl text-latte">4.5★</div>
+                    <div class="font-body text-xs text-crema/70 mt-1">380+ reseñas</div>
+                </div>
+                <!-- Decorative corner -->
+                <div class="absolute -top-4 -left-4 w-16 h-16 border-l-2 border-t-2 border-latte/40 rounded-tl-xl"></div>
+            </div>
+
+            <!-- Right: text -->
+            <div class="scroll-reveal">
+                <div class="font-body text-xs text-mocha tracking-[0.4em] uppercase mb-4">Nuestra historia</div>
+                <h2 class="font-display text-4xl md:text-5xl text-espresso mb-6 leading-tight">
+                    Donde el café<br>
+                    <em>encuentra la montaña</em>
+                </h2>
+                <div class="w-16 h-0.5 bg-latte mb-8"></div>
+                <p class="font-body text-base text-espresso/70 leading-relaxed mb-6">
+                    Nacida entre los verdes caminos que suben hacia el volcán Irazú, la <strong class="text-mocha">Cafetería Irazú</strong> es mucho más que un lugar para tomar café. Es un refugio donde el aroma del café recién chorreado se mezcla con el fresco aire de las montañas de Cartago.
+                </p>
+                <p class="font-body text-base text-espresso/70 leading-relaxed mb-10">
+                    Cada taza es preparada con cuidado artesanal, usando granos seleccionados de las mejores fincas costarricenses. Nuestra cocina ofrece desde desayunos tradicionales hasta platos del día, siempre con el sabor auténtico de Costa Rica.
+                </p>
+                <!-- Values grid -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-crema rounded-xl p-4 border border-latte/20">
+                        <div class="text-2xl mb-2">🫘</div>
+                        <div class="font-display text-base text-espresso">Café Artesanal</div>
+                        <div class="font-body text-xs text-espresso/50 mt-1">Granos selectos</div>
+                    </div>
+                    <div class="bg-crema rounded-xl p-4 border border-latte/20">
+                        <div class="text-2xl mb-2">🏔️</div>
+                        <div class="font-display text-base text-espresso">Vista al Irazú</div>
+                        <div class="font-body text-xs text-espresso/50 mt-1">Paisaje único</div>
+                    </div>
+                    <div class="bg-crema rounded-xl p-4 border border-latte/20">
+                        <div class="text-2xl mb-2">❤️</div>
+                        <div class="font-display text-base text-espresso">Hecho con Amor</div>
+                        <div class="font-body text-xs text-espresso/50 mt-1">Tradición tica</div>
+                    </div>
+                    <div class="bg-crema rounded-xl p-4 border border-latte/20">
+                        <div class="text-2xl mb-2">🌿</div>
+                        <div class="font-display text-base text-espresso">Ambiente Natural</div>
+                        <div class="font-body text-xs text-espresso/50 mt-1">Entorno verde</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ════════════════════════════════════ MENÚ ═══════════════════════════════════════════ -->
+<section id="menu" class="py-24 md:py-32" style="background: linear-gradient(135deg, #fdf6ee 0%, #f5e6d3 100%)">
+    <div class="max-w-6xl mx-auto px-6">
+        <div class="text-center mb-16 scroll-reveal">
+            <div class="font-body text-xs text-mocha tracking-[0.4em] uppercase mb-4">Lo que ofrecemos</div>
+            <h2 class="font-display text-4xl md:text-6xl text-espresso mb-4">Nuestro Menú</h2>
+            <p class="font-body text-espresso/60 max-w-xl mx-auto">Sabores auténticos preparados con ingredientes frescos y el toque especial de las montañas de Cartago.</p>
+        </div>
+
+        {% if categories %}
+        <!-- Category tabs -->
+        <div class="flex flex-wrap gap-3 justify-center mb-12 scroll-reveal">
+            <button class="category-tab active font-body text-sm tracking-wider uppercase px-6 py-2.5 rounded-full bg-espresso text-crema border border-espresso transition-all" data-category="all">
+                Todos
+            </button>
+            {% for category in categories %}
+            <button class="category-tab font-body text-sm tracking-wider uppercase px-6 py-2.5 rounded-full border border-espresso/30 text-espresso hover:bg-espresso hover:text-crema transition-all" data-category="{{ category.slug }}">
+                {{ category.icon }} {{ category.name }}
+            </button>
+            {% endfor %}
+        </div>
+
+        <!-- Products grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="products-grid">
+            {% for category in categories %}
+            {% for product in category.products.all %}
+            {% if product.available %}
+            <div class="product-card scroll-reveal" data-category="{{ category.slug }}">
+                <div class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-400 hover:-translate-y-1 border border-latte/10 group">
+                    <!-- Image area -->
+                    <div class="aspect-[4/3] bg-gradient-to-br from-crema to-beige relative overflow-hidden">
+                        {% if product.image %}
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        {% else %}
+                        <div class="w-full h-full flex items-center justify-center">
+                            <span class="text-6xl opacity-30">
+                                {% if category.icon %}{{ category.icon }}{% else %}☕{% endif %}
+                            </span>
+                        </div>
+                        {% endif %}
+                        {% if product.featured %}
+                        <div class="absolute top-3 left-3 font-body text-xs bg-latte text-white px-3 py-1 rounded-full">✦ Destacado</div>
+                        {% endif %}
+                    </div>
+                    <!-- Info -->
+                    <div class="p-5">
+                        <div class="font-body text-xs text-mocha/60 tracking-wider uppercase mb-1">{{ category.name }}</div>
+                        <h3 class="font-display text-lg text-espresso mb-2">{{ product.name }}</h3>
+                        <p class="font-body text-xs text-espresso/50 leading-relaxed mb-4 line-clamp-2">{{ product.description }}</p>
+                        <div class="flex items-center justify-between">
+                            <span class="font-display text-xl text-mocha">₡{{ product.price|floatformat:0 }}</span>
+                            <span class="font-body text-xs text-verde/70 bg-verde/10 px-3 py-1 rounded-full">Disponible</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+            {% endfor %}
+        </div>
+
+        {% else %}
+        <!-- Placeholder products when no DB data -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {% for item in "12345678" %}
+            <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-latte/10">
+                <div class="aspect-[4/3] bg-gradient-to-br from-crema to-beige flex items-center justify-center">
+                    <span class="text-5xl opacity-25">☕</span>
+                </div>
+                <div class="p-5">
+                    <div class="h-3 bg-crema rounded w-1/3 mb-2"></div>
+                    <div class="h-5 bg-crema/80 rounded w-2/3 mb-2"></div>
+                    <div class="h-3 bg-crema/50 rounded w-full mb-1"></div>
+                    <div class="h-3 bg-crema/50 rounded w-3/4 mb-4"></div>
+                    <div class="flex justify-between"><div class="h-5 bg-latte/30 rounded w-1/4"></div><div class="h-5 bg-verde/10 rounded w-1/4"></div></div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-8 font-body text-espresso/40 text-sm">Agrega productos desde el <a href="/admin" class="underline hover:text-mocha">panel de administración</a></div>
+        {% endif %}
+
+        <div class="text-center mt-12">
+            <a href="/menu/" class="font-body text-sm tracking-wider uppercase px-8 py-4 border border-espresso text-espresso hover:bg-espresso hover:text-crema rounded-full transition-all duration-300">
+                Ver Menú Completo →
+            </a>
+        </div>
+    </div>
+</section>
+
+
+<!-- ══════════════════════════════════ GALERÍA ══════════════════════════════════════════ -->
+<section id="galeria" class="py-24 md:py-32 bg-espresso">
+    <div class="max-w-6xl mx-auto px-6">
+        <div class="text-center mb-16 scroll-reveal">
+            <div class="font-body text-xs text-latte tracking-[0.4em] uppercase mb-4">Momentos especiales</div>
+            <h2 class="font-display text-4xl md:text-6xl text-crema mb-4">Galería</h2>
+            <p class="font-body text-crema/50 max-w-xl mx-auto">Capturando la esencia de Cafetería Irazú, donde cada rincón cuenta una historia.</p>
+        </div>
+
+        {% if gallery_images %}
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {% for image in gallery_images %}
+            <div class="gallery-item group relative overflow-hidden rounded-xl aspect-square scroll-reveal cursor-pointer" style="animation-delay:{{ forloop.counter0|add:0 }}00ms">
+                <img src="{{ image.image.url }}" alt="{{ image.title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                <div class="absolute inset-0 bg-espresso/0 group-hover:bg-espresso/40 transition-colors duration-300 flex items-center justify-center">
+                    <span class="text-crema text-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">+</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <!-- Mosaic placeholder -->
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div class="rounded-xl overflow-hidden col-span-2 md:col-span-1 row-span-2 aspect-square bg-gradient-to-br from-mocha/30 to-cafe/30 flex items-center justify-center border border-latte/10">
+                <div class="text-center text-crema/30">
+                    <div class="text-5xl mb-3">🏔️</div>
+                    <div class="font-body text-xs">Vista a las montañas</div>
+                </div>
+            </div>
+            <div class="rounded-xl overflow-hidden aspect-square bg-gradient-to-br from-verde/20 to-verdeClaro/20 flex items-center justify-center border border-latte/10">
+                <div class="text-center text-crema/30"><div class="text-4xl mb-2">☕</div><div class="font-body text-xs">Café artesanal</div></div>
+            </div>
+            <div class="rounded-xl overflow-hidden aspect-square bg-gradient-to-br from-latte/20 to-mocha/20 flex items-center justify-center border border-latte/10">
+                <div class="text-center text-crema/30"><div class="text-4xl mb-2">🍰</div><div class="font-body text-xs">Postres</div></div>
+            </div>
+            <div class="rounded-xl overflow-hidden aspect-square bg-gradient-to-br from-cafe/30 to-espresso/50 flex items-center justify-center border border-latte/10">
+                <div class="text-center text-crema/30"><div class="text-4xl mb-2">🐾</div><div class="font-body text-xs">Pet Friendly</div></div>
+            </div>
+            <div class="rounded-xl overflow-hidden aspect-square bg-gradient-to-br from-verde/30 to-verdeClaro/20 flex items-center justify-center border border-latte/10">
+                <div class="text-center text-crema/30"><div class="text-4xl mb-2">🌿</div><div class="font-body text-xs">Naturaleza</div></div>
+            </div>
+            <div class="rounded-xl overflow-hidden aspect-square bg-gradient-to-br from-mocha/20 to-latte/20 flex items-center justify-center border border-latte/10">
+                <div class="text-center text-crema/30"><div class="text-4xl mb-2">👨‍👩‍👧</div><div class="font-body text-xs">Área familiar</div></div>
+            </div>
+        </div>
+        <div class="text-center mt-8 font-body text-crema/30 text-sm">Agrega fotos desde el <a href="/admin" class="underline hover:text-latte">panel de administración</a></div>
+        {% endif %}
+    </div>
+</section>
+
+
+<!-- ══════════════════════════════ TESTIMONIOS ══════════════════════════════════════════ -->
+<section id="testimonios" class="py-24 md:py-32 bg-beige overflow-hidden">
+    <div class="max-w-6xl mx-auto px-6">
+        <div class="text-center mb-16 scroll-reveal">
+            <div class="font-body text-xs text-mocha tracking-[0.4em] uppercase mb-4">Lo que dicen de nosotros</div>
+            <h2 class="font-display text-4xl md:text-6xl text-espresso mb-4">Testimonios</h2>
+            <div class="flex items-center justify-center gap-2 font-display text-2xl text-latte">
+                ⭐⭐⭐⭐⭐ <span class="font-body text-base text-espresso/50 ml-2">4.5 · 380+ reseñas en Google</span>
+            </div>
+        </div>
+
+        {% if testimonials %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for testimonial in testimonials %}
+            <div class="testimonial-card bg-white rounded-2xl p-7 shadow-sm border border-latte/10 hover:shadow-lg transition-all duration-300 scroll-reveal">
+                <div class="flex items-center gap-1 text-latte text-lg mb-4">
+                    {% for i in "12345" %}
+                        {% if forloop.counter <= testimonial.rating %}⭐{% endif %}
+                    {% endfor %}
+                </div>
+                <p class="font-body text-espresso/70 leading-relaxed mb-6 italic">"{{ testimonial.comment }}"</p>
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-full bg-gradient-to-br from-latte to-mocha flex items-center justify-center text-white font-display text-sm">
+                        {{ testimonial.name|first }}
+                    </div>
+                    <div>
+                        <div class="font-display text-sm text-espresso">{{ testimonial.name }}</div>
+                        <div class="font-body text-xs text-espresso/40">Cliente verificado</div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <!-- Demo testimonials -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="bg-white rounded-2xl p-7 shadow-sm border border-latte/10">
+                <div class="text-latte text-lg mb-4">⭐⭐⭐⭐⭐</div>
+                <p class="font-body text-espresso/70 leading-relaxed mb-6 italic">"Un lugar mágico. El café chorreado tiene un sabor increíble y la vista a las montañas es simplemente espectacular. Definitivamente volvemos."</p>
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-full bg-gradient-to-br from-latte to-mocha flex items-center justify-center text-white font-display text-sm">M</div>
+                    <div><div class="font-display text-sm text-espresso">María González</div><div class="font-body text-xs text-espresso/40">San José</div></div>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl p-7 shadow-sm border border-latte/10">
+                <div class="text-latte text-lg mb-4">⭐⭐⭐⭐⭐</div>
+                <p class="font-body text-espresso/70 leading-relaxed mb-6 italic">"Las crepas son deliciosas y el ambiente es súper acogedor. Fuimos con nuestro perro y nos atendieron de maravilla. ¡100% recomendado!"</p>
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-full bg-gradient-to-br from-verde to-verdeClaro flex items-center justify-center text-white font-display text-sm">C</div>
+                    <div><div class="font-display text-sm text-espresso">Carlos Rodríguez</div><div class="font-body text-xs text-espresso/40">Cartago</div></div>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl p-7 shadow-sm border border-latte/10">
+                <div class="text-latte text-lg mb-4">⭐⭐⭐⭐½</div>
+                <p class="font-body text-espresso/70 leading-relaxed mb-6 italic">"El capuchino tiramisú es simplemente divino. El lugar tiene una vibra muy especial, ideal para desconectarse y disfrutar de la naturaleza."</p>
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-full bg-gradient-to-br from-mocha to-cafe flex items-center justify-center text-white font-display text-sm">A</div>
+                    <div><div class="font-display text-sm text-espresso">Ana Vargas</div><div class="font-body text-xs text-espresso/40">Heredia</div></div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+
+<!-- ══════════════════════════════ EXPERIENCIA ══════════════════════════════════════════ -->
+<section id="experiencia" class="py-24 md:py-32 bg-verde text-crema relative overflow-hidden">
+    <!-- Decorative mountains -->
+    <div class="absolute bottom-0 left-0 right-0 opacity-10">
+        <svg viewBox="0 0 1440 200" xmlns="http://www.w3.org/2000/svg"><path d="M0,100 L200,40 L400,80 L600,20 L800,60 L1000,30 L1200,70 L1440,40 L1440,200 L0,200Z" fill="white"/></svg>
+    </div>
+
+    <div class="max-w-6xl mx-auto px-6 relative z-10">
+        <div class="text-center mb-16 scroll-reveal">
+            <div class="font-body text-xs text-crema/60 tracking-[0.4em] uppercase mb-4">Por qué elegirnos</div>
+            <h2 class="font-display text-4xl md:text-6xl text-crema mb-4">La Experiencia Irazú</h2>
+            <p class="font-body text-crema/60 max-w-xl mx-auto">Más que un café, un destino donde cada visita se convierte en un recuerdo.</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="experience-card bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20 hover:bg-white/15 transition-all duration-300 scroll-reveal">
+                <div class="text-4xl mb-5">🏔️</div>
+                <h3 class="font-display text-xl text-crema mb-3">Vista a las Montañas</h3>
+                <p class="font-body text-sm text-crema/60 leading-relaxed">Disfruta de panorámicas únicas del volcán Irazú y las montañas de Cartago desde nuestra terraza.</p>
+            </div>
+            <div class="experience-card bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20 hover:bg-white/15 transition-all duration-300 scroll-reveal" style="animation-delay:100ms">
+                <div class="text-4xl mb-5">🐾</div>
+                <h3 class="font-display text-xl text-crema mb-3">Pet Friendly</h3>
+                <p class="font-body text-sm text-crema/60 leading-relaxed">Tu mejor amigo también es bienvenido. Contamos con área especial para mascotas y agua fresca.</p>
+            </div>
+            <div class="experience-card bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20 hover:bg-white/15 transition-all duration-300 scroll-reveal" style="animation-delay:200ms">
+                <div class="text-4xl mb-5">👨‍👩‍👧</div>
+                <h3 class="font-display text-xl text-crema mb-3">Área Familiar</h3>
+                <p class="font-body text-sm text-crema/60 leading-relaxed">Zona especial para los más pequeños con juegos y actividades. El lugar ideal para toda la familia.</p>
+            </div>
+            <div class="experience-card bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20 hover:bg-white/15 transition-all duration-300 scroll-reveal" style="animation-delay:300ms">
+                <div class="text-4xl mb-5">🅿️</div>
+                <h3 class="font-display text-xl text-crema mb-3">Parqueo Amplio</h3>
+                <p class="font-body text-sm text-crema/60 leading-relaxed">Amplio estacionamiento gratuito para que llegues sin preocupaciones, ideal para grupos y familias.</p>
+            </div>
+            <div class="experience-card bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20 hover:bg-white/15 transition-all duration-300 scroll-reveal" style="animation-delay:400ms">
+                <div class="text-4xl mb-5">🎵</div>
+                <h3 class="font-display text-xl text-crema mb-3">Música Agradable</h3>
+                <p class="font-body text-sm text-crema/60 leading-relaxed">Ambiente musical cuidadosamente seleccionado para crear la atmósfera perfecta de relajación.</p>
+            </div>
+            <div class="experience-card bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20 hover:bg-white/15 transition-all duration-300 scroll-reveal" style="animation-delay:500ms">
+                <div class="text-4xl mb-5">🥡</div>
+                <h3 class="font-display text-xl text-crema mb-3">Para Llevar</h3>
+                <p class="font-body text-sm text-crema/60 leading-relaxed">¿Tienes prisa? Todos nuestros productos también están disponibles para llevar. Mismo sabor, en tu camino.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ════════════════════════════════ CONTACTO ════════════════════════════════════════════ -->
+<section id="contacto" class="py-24 md:py-32 bg-beige">
+    <div class="max-w-6xl mx-auto px-6">
+        <div class="text-center mb-16 scroll-reveal">
+            <div class="font-body text-xs text-mocha tracking-[0.4em] uppercase mb-4">Estamos esperándote</div>
+            <h2 class="font-display text-4xl md:text-6xl text-espresso mb-4">Visítanos</h2>
+            <p class="font-body text-espresso/60 max-w-xl mx-auto">¿Tienes preguntas o quieres hacer una reservación? Contáctanos y con gusto te ayudamos.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <!-- Contact form -->
+            <div class="scroll-reveal">
+                <div class="bg-white rounded-2xl p-8 shadow-sm border border-latte/10">
+                    <h3 class="font-display text-2xl text-espresso mb-6">Envíanos un mensaje</h3>
+                    <form method="post" action="#contacto" class="space-y-5">
+                        {% csrf_token %}
+                        {% for field in contact_form %}
+                        <div>
+                            <label class="font-body text-xs tracking-wider uppercase text-espresso/60 block mb-2">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.errors %}
+                            <div class="font-body text-xs text-red-500 mt-1">{{ field.errors|join:", " }}</div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                        <button type="submit" class="w-full font-body text-sm tracking-wider uppercase bg-espresso text-crema py-4 rounded-xl hover:bg-cafe transition-colors duration-300 hover:shadow-lg">
+                            Enviar Mensaje ✦
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Quick contact -->
+                <div class="mt-6 grid grid-cols-2 gap-4">
+                    <a href="tel:+50663531551" class="bg-white rounded-xl p-5 border border-latte/10 hover:border-latte/40 transition-all hover:shadow-md flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full bg-latte/20 flex items-center justify-center text-xl">📞</div>
+                        <div>
+                            <div class="font-body text-xs text-espresso/50 uppercase tracking-wider">Teléfono</div>
+                            <div class="font-display text-base text-espresso">6353-1551</div>
+                        </div>
+                    </a>
+                    <a href="https://wa.me/50663531551" target="_blank" class="bg-white rounded-xl p-5 border border-latte/10 hover:border-green-300 transition-all hover:shadow-md flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-xl">💬</div>
+                        <div>
+                            <div class="font-body text-xs text-espresso/50 uppercase tracking-wider">WhatsApp</div>
+                            <div class="font-display text-base text-espresso">Escríbenos</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Map & info -->
+            <div class="scroll-reveal space-y-6">
+                <!-- Google Maps -->
+                <div class="rounded-2xl overflow-hidden shadow-sm border border-latte/10">
+                    <iframe
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3929.7!2d-83.88!3d9.88!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zOcKwNTInNDguMCJOIDgzwrA1Mic0OC4wIlc!5e0!3m2!1ses!2scr!4v1234567890"
+                        width="100%" height="280" style="border:0;" allowfullscreen="" loading="lazy"
+                        class="block">
+                    </iframe>
+                </div>
+
+                <!-- Info cards -->
+                <div class="bg-white rounded-2xl p-6 border border-latte/10">
+                    <h4 class="font-display text-xl text-espresso mb-5">Información</h4>
+                    <div class="space-y-4">
+                        <div class="flex items-start gap-4">
+                            <div class="w-9 h-9 rounded-full bg-latte/20 flex items-center justify-center flex-shrink-0">📍</div>
+                            <div>
+                                <div class="font-body text-xs text-espresso/50 uppercase tracking-wider mb-1">Dirección</div>
+                                <div class="font-body text-sm text-espresso">V4VF+96F, Ruta 219, Cot, Cartago Province</div>
+                                <a href="https://maps.google.com/?q=V4VF+96F,+Ruta+219,+Cot,+Cartago" target="_blank" class="font-body text-xs text-mocha hover:underline mt-1 block">Ver en Google Maps →</a>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="w-9 h-9 rounded-full bg-latte/20 flex items-center justify-center flex-shrink-0">🕐</div>
+                            <div>
+                                <div class="font-body text-xs text-espresso/50 uppercase tracking-wider mb-1">Horario</div>
+                                <div class="font-body text-sm text-espresso">Lun–Vie: 7:00 – 18:00</div>
+                                <div class="font-body text-sm text-espresso">Sáb: 7:00 – 19:00 · Dom: 8:00 – 17:00</div>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="w-9 h-9 rounded-full bg-latte/20 flex items-center justify-center flex-shrink-0">✨</div>
+                            <div>
+                                <div class="font-body text-xs text-espresso/50 uppercase tracking-wider mb-1">Calificación</div>
+                                <div class="font-display text-xl text-latte">4.5 ⭐ <span class="font-body text-sm text-espresso/50">· 380+ opiniones</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
