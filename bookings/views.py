@@ -24,7 +24,7 @@ Hola {reservation.customer_name},
 ⏰ Hora: {reservation.time}
 👥 Personas: {reservation.guests}
 
-📍 Dirección: Ruta 219, Cot, Cartago
+📍 Dirección: Cartago
 
 📞 Si necesitas modificar o cancelar, llámanos al 6353-1551
 
@@ -54,7 +54,7 @@ Personas: {reservation.guests}
 Revisa el panel de admin para más detalles.
                     """,
                     from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=['melanygarita0@gmail.com'],  # email como dueño
+                    recipient_list=['melanygaritauu1276@gmail.com'],  # email como dueño
                     fail_silently=True,
                 )
             except:

@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from decouple import config 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-cafeteria-irazu-cartago-costa-rica-2024'
@@ -53,8 +54,12 @@ WSGI_APPLICATION = 'cafeteria_irazu.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'cafeteria_db',           # Nombre de la base de datos
+        'USER': 'postgres',                # Usuario de PostgreSQL
+        'PASSWORD': 'GRivera1276',        # Tu contraseña (cámbiala si es diferente) GRivera1276
+        'HOST': 'localhost',               # Servidor local
+        'PORT': '5432',                    # Puerto por defecto de PostgreSQL
     }
 }
 
@@ -79,6 +84,15 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+CAFE_EMAIL = 'melanygaritauu1276@gmail.com'  # ← Cambia al email donde quieres recibir
 # Email configuration (opcional)
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Para pruebas
+#EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Para pruebas
 # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  # Para producción
+# Configuración para PRODUCCIÓN con Gmail
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'melanygaritauu1276@gmail.com'  # Tu email de Gmail
+EMAIL_HOST_PASSWORD = 'ntmnvxkvwwhhgaap'  # La contraseña de 16 dígitos
+DEFAULT_FROM_EMAIL = 'Cafetería Irazú <melanygaritauu1276@gmail.com>'
