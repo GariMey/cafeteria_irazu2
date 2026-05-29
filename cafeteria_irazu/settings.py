@@ -1,11 +1,14 @@
 import os
 from pathlib import Path
-from decouple import config 
+from decouple import config
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-SECRET_KEY = 'django-insecure-cafeteria-irazu-cartago-costa-rica-2024'
-DEBUG = True
-ALLOWED_HOSTS = ['*']
+
+# VARIABLES DE ENTORNO
+
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-cafeteria-irazu-cartago-costa-rica-2024')
+DEBUG = config('DEBUG', default=True, cast=bool)
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*').split(',')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -41,17 +44,19 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
-                'django.template.context_processors.debug', 
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                 'cart.context_processors.cart', 
+                'cart.context_processors.cart',
             ],
         },
     },
 ]
 
 WSGI_APPLICATION = 'cafeteria_irazu.wsgi.application'
+
+# BASE DE DATOS
 import dj_database_url
 
 DATABASES = {
@@ -82,16 +87,22 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CAFE_EMAIL = 'cuaderno.melanygr@gmail.com'  # ← Cambia al email donde quieres recibir
-# Email configuration (opcional)
-#EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Para pruebas
 
+# EMAIL CONFIGURATION CON SENDGRID
 
-EMAIL_BACKEND = "sendgrid_backend.SendgridBackend"
-SENDGRID_API_KEY = "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"
-DEFAULT_FROM_EMAIL = 'Cafetería Irazú <cuaderno.melanygr@gmail.com>'
-SENDGRID_SANDBOX_MODE_IN_DEBUG = False
-SENDGRID_ECHO_TO_STDOUT = False
+SENDGRID_API_KEY = config('SENDGRID_API_KEY', default='')
+
+if SENDGRID_API_KEY:
+    EMAIL_BACKEND = "sendgrid_backend.SendgridBackend"
+    DEFAULT_FROM_EMAIL = 'Cafeteria Irazu <cuaderno.melanygr@gmail.com>'
+    CAFE_EMAIL = 'cuaderno.melanygr@gmail.com'
+    SENDGRID_SANDBOX_MODE_IN_DEBUG = False
+    SENDGRID_ECHO_TO_STDOUT = False
+else:
+    # Modo consola para desarrollo sin API Key
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    DEFAULT_FROM_EMAIL = 'cafeteria@localhost.com'
+    CAFE_EMAIL = 'cuaderno.melanygr@gmail.com'
 
 CSRF_TRUSTED_ORIGINS = [
     'https://cafeteria-irazu2.onrender.com',
