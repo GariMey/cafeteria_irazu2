@@ -4,7 +4,8 @@ from django.contrib import messages
 from django.core.mail import send_mail
 from django.conf import settings
 from .forms import ReservationForm
-
+from django.shortcuts import render
+from .models import Table
 def create_booking(request):
     if request.method == 'POST':
         form = ReservationForm(request.POST)
@@ -70,3 +71,6 @@ Revisa el panel de admin para más detalles.
 def booking_success(request):
     return render(request, 'bookings/success.html')
 
+def tables_map(request):
+    tables = Table.objects.filter(is_active=True)
+    return render(request, 'bookings/tables_map.html', {'tables': tables})

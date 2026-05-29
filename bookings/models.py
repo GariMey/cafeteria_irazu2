@@ -2,15 +2,13 @@
 from django.db import models
 
 class Table(models.Model):
-    number = models.IntegerField(unique=True, verbose_name="Número de Mesa")
-    capacity = models.IntegerField(default=4, verbose_name="Capacidad")
-    is_active = models.BooleanField(default=True, verbose_name="Activa")
-    
-    class Meta:
-        verbose_name = "Mesa"
-        verbose_name_plural = "Mesas"
-        ordering = ['number']
-    
+    number = models.IntegerField(unique=True)
+    capacity = models.IntegerField(default=4)
+    is_active = models.BooleanField(default=True)
+    x_position = models.IntegerField(default=0, help_text="Posición X en el mapa (0-4)")
+    y_position = models.IntegerField(default=0, help_text="Posición Y en el mapa (0-3)")
+
+
     def __str__(self):
         return f"Mesa {self.number} ({self.capacity} pers.)"
 

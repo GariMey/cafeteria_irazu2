@@ -14,8 +14,7 @@
         <!-- Menú Desktop -->
         <div class="hidden md:flex items-center gap-6">
             <a href="/#nosotros" class="font-body text-sm text-crema/80 hover:text-crema tracking-wider uppercase transition-colors">Nosotros</a>
-            <a href="/menu/" class="font-body text-sm text-latte hover:text-crema tracking-wider uppercase transition-colors">
-                Menú 
+            <a href="/menu/" class="font-body text-sm text-latte hover:text-crema tracking-wider uppercase transition-colors">Menú 
             </a>
             <a href="/#galeria" class="font-body text-sm text-crema/80 hover:text-crema tracking-wider uppercase transition-colors">Galería</a>
             <a href="/#experiencia" class="font-body text-sm text-crema/80 hover:text-crema tracking-wider uppercase transition-colors">Experiencia</a>
@@ -42,11 +41,14 @@
             <a href="tel:+50663531551" class="font-body text-sm bg-latte/20 hover:bg-latte/30 border border-latte/40 text-crema px-4 py-2 rounded-full transition-all hover:scale-105">
                 📞 6353-1551
             </a>
+            <a href="{% url 'bookings:tables_map' %}" class="font-body text-sm text-crema/80 hover:text-crema tracking-wider uppercase transition-colors">Mapa de Mesas
+</a>
         </div>
         
         <button id="mobile-menu-btn" class="md:hidden text-crema p-2 flex flex-col gap-1.5">
             <span class="block w-6 h-0.5 bg-crema transition-all"></span>
             <span class="block w-6 h-0.5 bg-crema transition-all"></span>
+            <span class="block w-4 h-0.5 bg-crema transition-all"></span>
             <span class="block w-4 h-0.5 bg-crema transition-all"></span>
         </button>
     </div>
@@ -56,7 +58,7 @@
         <div class="px-6 py-6 flex flex-col gap-4">
             <a href="/#nosotros" class="font-body text-sm text-crema/80 hover:text-latte tracking-wider uppercase py-2 border-b border-latte/10">Nosotros</a>
             <a href="/#menu" class="font-body text-sm text-crema/80 hover:text-latte tracking-wider uppercase py-2 border-b border-latte/10">Menú</a>
-            <a href="/menu/" class="font-body text-sm text-latte hover:text-crema tracking-wider uppercase py-2 border-b border-latte/10">📋 Menú Completo</a>
+            <a href="/menu/" class="font-body text-sm text-latte hover:text-crema tracking-wider uppercase py-2 border-b border-latte/10">Menú Completo</a>
             <a href="/#galeria" class="font-body text-sm text-crema/80 hover:text-latte tracking-wider uppercase py-2 border-b border-latte/10">Galería</a>
             <a href="/#experiencia" class="font-body text-sm text-crema/80 hover:text-latte tracking-wider uppercase py-2 border-b border-latte/10">Experiencia</a>
             <a href="/#contacto" class="font-body text-sm text-crema/80 hover:text-latte tracking-wider uppercase py-2 border-b border-latte/10">Contacto</a>
@@ -76,5 +78,6 @@
             
             <a href="tel:+50663531551" class="font-body text-sm text-latte mt-2">📞 6353-1551</a>
         </div>
+        
     </div>
 </nav>

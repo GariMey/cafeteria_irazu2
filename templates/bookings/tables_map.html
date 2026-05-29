@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mapa de Mesas - Cafeteria Irazu{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-espresso pt-32 pb-32">
+    <div class="max-w-4xl mx-auto px-6">
+        <div class="text-center mb-12">
+            <h1 class="font-display text-5xl text-crema mb-4">Mapa de Mesas</h1>
+            <p class="font-body text-crema/50">Selecciona tu mesa favorita para reservar</p>
+        </div>
+
+        <div class="bg-white/5 border border-latte/20 rounded-2xl p-8">
+            <!-- Leyenda -->
+            <div class="flex justify-center gap-6 mb-8">
+                <div class="flex items-center gap-2">
+                    <div class="w-5 h-5 bg-green-500 rounded"></div>
+                    <span class="text-crema/70 text-sm">Disponible</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-5 h-5 bg-red-500 rounded"></div>
+                    <span class="text-crema/70 text-sm">Reservada</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-5 h-5 bg-gray-500 rounded"></div>
+                    <span class="text-crema/70 text-sm">Mantenimiento</span>
+                </div>
+            </div>
+
+            <!-- Mapa de mesas (Grid 5x3) -->
+            <div class="grid grid-cols-5 gap-4 bg-espresso/50 p-6 rounded-xl">
+                {% for y in "012"|make_list %}
+                    {% for x in "01234"|make_list %}
+                        {% with mesa=tables|dictsort:"number" %}
+                            {% for table in tables %}
+                                {% if table.x_position == x|add:0 and table.y_position == y|add:0 %}
+                                <div class="table-card p-4 rounded-xl text-center transition-all hover:scale-105 
+                                    {% if table.is_reserved_today %}bg-red-500/30 border-red-500
+                                    {% else %}bg-green-500/30 border-green-500{% endif %}
+                                    border-2 cursor-pointer"
+                                    data-table-id="{{ table.id }}"
+                                    data-table-number="{{ table.number }}"
+                                    data-table-capacity="{{ table.capacity }}">
+                                    <div class="text-2xl mb-1">🪑</div>
+                                    <div class="font-display text-white text-lg">Mesa {{ table.number }}</div>
+                                    <div class="text-crema/70 text-xs">{{ table.capacity }} personas</div>
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        {% endwith %}
+                    {% endfor %}
+                {% endfor %}
+            </div>
+
+            <!-- Barra lateral (mostrar info de mesa seleccionada) -->
+            <div class="mt-8 p-4 bg-white/10 rounded-xl">
+                <h3 class="font-display text-crema mb-2">Informacion de la mesa</h3>
+                <div id="table-info" class="text-crema/70">
+                    Selecciona una mesa para ver sus detalles
+                </div>
+                <a id="reserve-btn" href="#" class="hidden mt-4 inline-block bg-latte text-espresso px-6 py-2 rounded-full font-semibold hover:bg-latte/80 transition">
+                    Reservar esta mesa
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.querySelectorAll('.table-card').forEach(card => {
+    card.addEventListener('click', function() {
+        // Remover seleccion anterior
+        document.querySelectorAll('.table-card').forEach(c => {
+            c.classList.remove('ring-2', 'ring-yellow-400');
+        });
+        
+        // Marcar seleccion actual
+        this.classList.add('ring-2', 'ring-yellow-400');
+        
+        // Mostrar informacion
+        const tableId = this.dataset.tableId;
+        const tableNumber = this.dataset.tableNumber;
+        const tableCapacity = this.dataset.tableCapacity;
+        
+        document.getElementById('table-info').innerHTML = `
+            <p>Mesa ${tableNumber} - Capacidad: ${tableCapacity} personas</p>
+            <p class="text-xs mt-1">Ventana al jardin | Cerca del escenario</p>
+        `;
+        
+        const reserveBtn = document.getElementById('reserve-btn');
+        reserveBtn.href = `/bookings/?table=${tableId}`;
+        reserveBtn.classList.remove('hidden');
+    });
+});
+</script>
+{% endblock %}
