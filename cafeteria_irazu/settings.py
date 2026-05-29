@@ -92,3 +92,7 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'melanygaritauu1276@gmail.com'  # Tu email de Gmail
 EMAIL_HOST_PASSWORD = 'ntmnvxkvwwhhgaap'  # La contraseña de 16 dígitos
 DEFAULT_FROM_EMAIL = 'Cafetería Irazú <melanygaritauu1276@gmail.com>'
+# Se agrego esto para solucionar el error 403 de Django en el deploy
+CSRF_TRUSTED_ORIGINS = [
+    'https://cafeteria-irazu2.onrender.com',
+]
