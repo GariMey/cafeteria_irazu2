@@ -84,15 +84,12 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CAFE_EMAIL = 'melanygaritauu1276@gmail.com'  # ← Cambia al email donde quieres recibir
+CAFE_EMAIL = 'cuaderno.melanygr@gmail.com'  # ← Cambia al email donde quieres recibir
 # Email configuration (opcional)
 #EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Para pruebas
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  # Para producción
-# Configuración para PRODUCCIÓN con Gmail
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'melanygaritauu1276@gmail.com'  # Tu email de Gmail
-EMAIL_HOST_PASSWORD = 'ntmnvxkvwwhhgaap'  # La contraseña de 16 dígitos
-DEFAULT_FROM_EMAIL = 'Cafetería Irazú <melanygaritauu1276@gmail.com>'
+
+
+EMAIL_BACKEND = "sendgrid_backend.SendgridBackend"
+SENDGRID_API_KEY = "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"
+DEFAULT_FROM_EMAIL = 'Cafetería Irazú <cuaderno.melanygr@gmail.com>'
+SENDGRID_SANDBOX_MODE_IN_DEBUG = False
