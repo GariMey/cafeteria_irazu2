@@ -428,21 +428,34 @@
             <div class="scroll-reveal">
                 <div class="bg-white rounded-2xl p-8 shadow-sm border border-latte/10">
                     <h3 class="font-display text-2xl text-espresso mb-6">Envíanos un mensaje</h3>
-                    <!-- CORREGIDO: action sin # -->
+                    
+                    <!-- FORMULARIO DE CONTACTO CORREGIDO -->
                     <form method="post" action="/#contacto" class="space-y-5">
                         {% csrf_token %}
                         <input type="hidden" name="submit_contact" value="1">
-                        {% for field in contact_form %}
+                        
                         <div>
-                            <label class="font-body text-xs tracking-wider uppercase text-espresso/60 block mb-2">{{ field.label }}</label>
-                            {{ field }}
-                            {% if field.errors %}
-                            <div class="font-body text-xs text-red-500 mt-1">{{ field.errors|join:", " }}</div>
-                            {% endif %}
+                            <label class="font-body text-xs tracking-wider uppercase text-espresso/60 block mb-2">Nombre</label>
+                            <input type="text" name="name" required class="contact-input w-full" placeholder="Tu nombre">
                         </div>
-                        {% endfor %}
+                        
+                        <div>
+                            <label class="font-body text-xs tracking-wider uppercase text-espresso/60 block mb-2">Correo electronico</label>
+                            <input type="email" name="email" required class="contact-input w-full" placeholder="tu@correo.com">
+                        </div>
+                        
+                        <div>
+                            <label class="font-body text-xs tracking-wider uppercase text-espresso/60 block mb-2">Teléfono</label>
+                            <input type="tel" name="phone" class="contact-input w-full" placeholder="Teléfono (opcional)">
+                        </div>
+                        
+                        <div>
+                            <label class="font-body text-xs tracking-wider uppercase text-espresso/60 block mb-2">Mensaje</label>
+                            <textarea name="message" required rows="5" class="contact-input w-full" placeholder="¿En que podemos ayudarte?"></textarea>
+                        </div>
+                        
                         <button type="submit" class="w-full font-body text-sm tracking-wider uppercase bg-espresso text-crema py-4 rounded-xl hover:bg-cafe transition-colors duration-300 hover:shadow-lg">
-                            Enviar Mensaje ✦
+                            Enviar Mensaje
                         </button>
                     </form>
                 </div>
