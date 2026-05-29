@@ -51,16 +51,12 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'cafeteria_irazu.wsgi.application'
+import dj_database_url
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'cafeteria_db',           # Nombre de la base de datos
-        'USER': 'postgres',                # Usuario de PostgreSQL
-        'PASSWORD': 'GRivera1276',        # Tu contraseña (cámbiala si es diferente) GRivera1276
-        'HOST': 'localhost',               # Servidor local
-        'PORT': '5432',                    # Puerto por defecto de PostgreSQL
-    }
+    'default': dj_database_url.config(
+        default=os.environ.get('DATABASE_URL', 'postgresql://postgres:GRivera1276@localhost:5432/cafeteria_db')
+    )
 }
 
 AUTH_PASSWORD_VALIDATORS = [
