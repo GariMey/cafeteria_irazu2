@@ -23,6 +23,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -51,16 +52,12 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'cafeteria_irazu.wsgi.application'
+import dj_database_url
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'cafeteria_db',           # Nombre de la base de datos
-        'USER': 'postgres',                # Usuario de PostgreSQL
-        'PASSWORD': 'GRivera1276',        # Tu contraseña (cámbiala si es diferente) GRivera1276
-        'HOST': 'localhost',               # Servidor local
-        'PORT': '5432',                    # Puerto por defecto de PostgreSQL
-    }
+    'default': dj_database_url.config(
+        default=os.environ.get('DATABASE_URL', 'postgresql://postgres:GRivera1276@localhost:5432/cafeteria_db')
+    )
 }
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -93,3 +90,7 @@ EMAIL_BACKEND = "sendgrid_backend.SendgridBackend"
 SENDGRID_API_KEY = "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"
 DEFAULT_FROM_EMAIL = 'Cafetería Irazú <cuaderno.melanygr@gmail.com>'
 SENDGRID_SANDBOX_MODE_IN_DEBUG = False
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://cafeteria-irazu2.onrender.com',
+]
