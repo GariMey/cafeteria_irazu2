@@ -35,26 +35,26 @@ def home(request):
                     send_mail(
                         subject='📩 Nuevo mensaje de contacto - Cafetería Irazú',
                         message=f"""
-╔══════════════════════════════════════════════════════════╗
-║         NUEVO MENSAJE DE CONTACTO                        ║
-╚══════════════════════════════════════════════════════════╝
 
-📋 DATOS DEL CLIENTE:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         NUEVO MENSAJE DE CONTACTO                        
+
+
+DATOS DEL CLIENTE:
+
    Nombre: {contact_message.name}
    Email: {contact_message.email}
    Teléfono: {contact_message.phone or 'No especificado'}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-💬 MENSAJE:
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MENSAJE:
+
 {contact_message.message}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-📅 Fecha: {contact_message.created_at.strftime('%d/%m/%Y %H:%M')}
+Fecha: {contact_message.created_at.strftime('%d/%m/%Y %H:%M')}
 
-✅ Responder a: {contact_message.email}
-📞 Llamar a: {contact_message.phone or 'No disponible'}
+Responder a: {contact_message.email}
+Llamar a: {contact_message.phone or 'No disponible'}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Cafetería Irazú - Cartago, Costa Rica
@@ -69,21 +69,21 @@ Cafetería Irazú - Cartago, Costa Rica
                 # Enviar email de confirmación al cliente
                 try:
                     send_mail(
-                        subject='✅ Hemos recibido tu mensaje - Cafetería Irazú',
+                        subject='Hemos recibido tu mensaje - Cafetería Irazú',
                         message=f"""
 Hola {contact_message.name},
 
 ¡Gracias por contactarnos! Hemos recibido tu mensaje y te responderemos a la brevedad.
 
-📝 Tu mensaje fue:
+Tu mensaje fue:
 "{contact_message.message}"
 
-⏰ Tiempo estimado de respuesta: 24 horas
+Tiempo estimado de respuesta: 24 horas
 
-📍 Puedes encontrarnos en:
+Puedes encontrarnos en:
     Cartago, Costa Rica
 
-📞 O llámanos directamente al: 6353-1551
+O llámanos directamente al: 6353-1551
 
 ¡Te esperamos pronto en Cafetería Irazú!
 

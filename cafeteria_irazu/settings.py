@@ -41,7 +41,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
-                'django.template.context_processors.debug',
+                'django.template.context_processors.debug', 
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -75,6 +75,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -87,9 +88,10 @@ CAFE_EMAIL = 'cuaderno.melanygr@gmail.com'  # ← Cambia al email donde quieres 
 
 
 EMAIL_BACKEND = "sendgrid_backend.SendgridBackend"
-SENDGRID_API_KEY = "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"
+SENDGRID_API_KEY = "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"
 DEFAULT_FROM_EMAIL = 'Cafetería Irazú <cuaderno.melanygr@gmail.com>'
 SENDGRID_SANDBOX_MODE_IN_DEBUG = False
+SENDGRID_ECHO_TO_STDOUT = False
 
 CSRF_TRUSTED_ORIGINS = [
     'https://cafeteria-irazu2.onrender.com',
