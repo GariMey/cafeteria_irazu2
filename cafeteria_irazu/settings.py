@@ -18,6 +18,7 @@ INSTALLED_APPS = [
     'bookings',
     'newsletter',
     'payments',
+    'dashboard',  # agregue esta línea ag
 ]
 
 MIDDLEWARE = [
