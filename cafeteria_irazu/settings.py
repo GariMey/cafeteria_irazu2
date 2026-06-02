@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from decouple import config
+import sendgrid
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -92,18 +93,36 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 SENDGRID_API_KEY = config('SENDGRID_API_KEY', default='')
 
+def send_sendgrid_email(subject, html_content, to_emails, from_email='cuaderno.melanygr@gmail.com'):
+    """Función para enviar correos con SendGrid"""
+    try:
+        sg = sendgrid.SendGridAPIClient(api_key=SENDGRID_API_KEY)
+        from_email = sendgrid.From(from_email)
+        to_email = sendgrid.To(to_emails[0])
+        content = sendgrid.Content("text/plain", html_content)
+        mail = sendgrid.Mail(from_email, to_email, subject, content)
+        response = sg.client.mail.send.post(request_body=mail.get())
+        return response.status_code == 202
+    except Exception as e:
+        print(f"Error SendGrid: {e}")
+        return False
+
+# O usar el backend oficial (si funciona)
 if SENDGRID_API_KEY:
-    EMAIL_BACKEND = "sendgrid_backend.SendgridBackend"
-    DEFAULT_FROM_EMAIL = 'Cafeteria Irazu <cuaderno.melanygr@gmail.com>'
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_HOST = 'smtp.sendgrid.net'
+    EMAIL_PORT = 587
+    EMAIL_USE_TLS = True
+    EMAIL_HOST_USER = 'apikey'
+    EMAIL_HOST_PASSWORD = SENDGRID_API_KEY
+    DEFAULT_FROM_EMAIL = 'cuaderno.melanygr@gmail.com'
     CAFE_EMAIL = 'cuaderno.melanygr@gmail.com'
-    SENDGRID_SANDBOX_MODE_IN_DEBUG = False
-    SENDGRID_ECHO_TO_STDOUT = False
 else:
-    # Modo consola para desarrollo sin API Key
+    # Fallback a consola
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
     DEFAULT_FROM_EMAIL = 'cafeteria@localhost.com'
     CAFE_EMAIL = 'cuaderno.melanygr@gmail.com'
-
+    
 CSRF_TRUSTED_ORIGINS = [
     'https://cafeteria-irazu2.onrender.com',
 ]

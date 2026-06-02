@@ -54,7 +54,7 @@ Personas: {reservation.guests}
 Revisa el panel de admin para más detalles.
                     """,
                     from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=['melanygaritauu1276@gmail.com'],  # email como dueño
+                    recipient_list=['cuaderno.melanygr@gmail.com'],  # email como dueño
                     fail_silently=True,
                 )
             except:
