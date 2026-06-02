@@ -1,4 +1,3 @@
-# D:\cafeteria_irazu_proyecto\cafeteria_irazu\payments\admin.py
 from django.contrib import admin
 from django.utils.html import format_html
 from .models import Payment, PaymentItem
@@ -16,9 +15,9 @@ class PaymentItemInline(admin.TabularInline):
 class PaymentAdmin(admin.ModelAdmin):
     list_display = ['transaction_id', 'customer_name', 'amount_display', 'status_badge', 'payment_method', 'created_at']
     list_filter = ['status', 'payment_method', 'created_at']
-    list_editable = []  # Quitamos status de list_editable para evitar el error
+    list_editable = []
     search_fields = ['transaction_id', 'customer_name', 'customer_email', 'customer_phone']
-    readonly_fields = ['transaction_id', 'created_at', 'amount_display']
+    readonly_fields = ['transaction_id', 'created_at', 'amount_display', 'status_badge']
     inlines = [PaymentItemInline]
     date_hierarchy = 'created_at'
     
@@ -46,7 +45,7 @@ class PaymentAdmin(admin.ModelAdmin):
             'fields': ('customer_name', 'customer_email', 'customer_phone')
         }),
         ('Información del Pago', {
-            'fields': ('transaction_id', 'amount_display', 'status_badge', 'payment_method')
+            'fields': ('transaction_id', 'amount_display', 'status', 'payment_method')
         }),
         ('Fechas', {
             'fields': ('created_at',)
