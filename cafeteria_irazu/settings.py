@@ -1,5 +1,8 @@
 import os
 import dj_database_url
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 from pathlib import Path
 from decouple import config
 
@@ -21,6 +24,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'cloudinary_storage',
+    'cloudinary',
     'cafeteria',
     'cart',
     'bookings',
@@ -89,6 +94,13 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME', 'dkm1zpb2l'),
+    'API_KEY': os.getenv('CLOUDINARY_API_KEY', '313624234974938'),
+    'API_SECRET': os.getenv('CLOUDINARY_API_SECRET', 'jvkLAQdYe2dORdlzSEVq_HTw49g'),
+}
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 SENDGRID_API_KEY = config('SENDGRID_API_KEY', default='')
 
