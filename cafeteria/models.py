@@ -87,3 +87,20 @@ class ContactMessage(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.email}"
+
+class Testimonial(models.Model):
+    RATING_CHOICES = [(i, '⭐' * i) for i in range(1, 6)]
+    name = models.CharField(max_length=100, verbose_name="Nombre")
+    email = models.EmailField(verbose_name="Email", blank=True, null=True)
+    comment = models.TextField(verbose_name="Comentario")
+    rating = models.IntegerField(choices=RATING_CHOICES, default=5, verbose_name="Calificación")
+    active = models.BooleanField(default=True, verbose_name="Activo")  # False = requiere aprobación
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Testimonio"
+        verbose_name_plural = "Testimonios"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.name} - {self.rating}⭐"

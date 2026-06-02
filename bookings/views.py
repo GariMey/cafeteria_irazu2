@@ -14,19 +14,19 @@ def create_booking(request):
             # Enviar email al cliente
             try:
                 send_mail(
-                    subject='✅ Reserva Confirmada - Cafetería Irazú',
+                    subject='Reserva Confirmada - Cafetería Irazú',
                     message=f"""
 Hola {reservation.customer_name},
 
 ¡Gracias por reservar en Cafetería Irazú!
 
-📅 Fecha: {reservation.date}
-⏰ Hora: {reservation.time}
-👥 Personas: {reservation.guests}
+Fecha: {reservation.date}
+Hora: {reservation.time}
+Personas: {reservation.guests}
 
-📍 Dirección: Ruta 219, Cot, Cartago
+Dirección: Cartago
 
-📞 Si necesitas modificar o cancelar, llámanos al 6353-1551
+Si necesitas modificar o cancelar, llámanos al 6353-1551
 
 ¡Te esperamos!
                     """,
@@ -40,7 +40,7 @@ Hola {reservation.customer_name},
             # Opcional: También enviar notificación al dueño
             try:
                 send_mail(
-                    subject='📅 Nueva Reserva - Cafetería Irazú',
+                    subject='Nueva Reserva - Cafetería Irazú',
                     message=f"""
 Nueva reserva creada:
 
@@ -54,13 +54,13 @@ Personas: {reservation.guests}
 Revisa el panel de admin para más detalles.
                     """,
                     from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=['melanygarita0@gmail.com'],  # email como dueño
+                    recipient_list=['cuaderno.melanygr@gmail.com'],  # email como dueño
                     fail_silently=True,
                 )
             except:
                 pass
             
-            messages.success(request, f'✅ Reserva creada para el {reservation.date} a las {reservation.time}. ¡Te esperamos!')
+            messages.success(request, f'Reserva creada para el {reservation.date} a las {reservation.time}. ¡Te esperamos!')
             return redirect('bookings:booking_success')
     else:
         form = ReservationForm()
@@ -69,3 +69,4 @@ Revisa el panel de admin para más detalles.
 
 def booking_success(request):
     return render(request, 'bookings/success.html')
+

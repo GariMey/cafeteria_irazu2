@@ -12,12 +12,14 @@ class Cart(models.Model):
         verbose_name_plural = "Carritos"
     
     def get_total(self):
+        """Calcula el total del carrito"""
         total = Decimal('0.00')
         for item in self.items.all():
             total += item.get_subtotal()
         return total
     
     def get_item_count(self):
+        """Retorna el número total de items"""
         return self.items.count()
     
     def __str__(self):
@@ -34,6 +36,7 @@ class CartItem(models.Model):
         verbose_name_plural = "Items del Carrito"
     
     def get_subtotal(self):
+        """Calcula subtotal del item"""
         return self.product.price * Decimal(str(self.quantity))
     
     def __str__(self):
