@@ -124,5 +124,5 @@ else:
     CAFE_EMAIL = 'cuaderno.melanygr@gmail.com'
     
 CSRF_TRUSTED_ORIGINS = [
-    'https://cafeteria-irazu2.onrender.com',
+    'https://cafeteria-irazu2-4tub.onrender.com',
 ]
