@@ -1,6 +1,7 @@
 import os
 import dj_database_url
 from pathlib import Path
+from decouple import config
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-cafeteria-irazu-cartago-costa-rica-2024'
@@ -57,11 +58,17 @@ WSGI_APPLICATION = 'cafeteria_irazu.wsgi.application'
 # BASE DE DATOS
 import dj_database_url
 
+#DATABASES = {
+#    'default': {
+#        'ENGINE': 'django.db.backends.sqlite3',
+#        'NAME': BASE_DIR / 'db.sqlite3',
+#    }
+#}
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default=os.environ.get('DATABASE_URL', 'postgresql://postgres:GRivera1276@localhost:5432/cafeteria_db')
+    )
 }
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -85,6 +92,22 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Email configuration (opcional)
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Para pruebas
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  # Para producción
+# EMAIL CONFIGURATION CON SENDGRID
+
+SENDGRID_API_KEY = config('SENDGRID_API_KEY', default='')
+
+if SENDGRID_API_KEY:
+    EMAIL_BACKEND = "sendgrid_backend.SendgridBackend"
+    DEFAULT_FROM_EMAIL = 'Cafeteria Irazu <cuaderno.melanygr@gmail.com>'
+    CAFE_EMAIL = 'cuaderno.melanygr@gmail.com'
+    SENDGRID_SANDBOX_MODE_IN_DEBUG = False
+    SENDGRID_ECHO_TO_STDOUT = False
+else:
+    # Modo consola para desarrollo sin API Key
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    DEFAULT_FROM_EMAIL = 'cafeteria@localhost.com'
+    CAFE_EMAIL = 'cuaderno.melanygr@gmail.com'
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://cafeteria-irazu2.onrender.com',
+]
