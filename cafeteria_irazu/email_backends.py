@@ -48,6 +48,10 @@ class BrevoEmailBackend(BaseEmailBackend):
         return sent
 
     def _send(self, message):
+        if self.api_key.startswith('xsmtpsib-'):
+            # Error frecuente: en Brevo la clave SMTP y la de API están en la misma página
+            raise RuntimeError("BREVO_API_KEY es una clave SMTP (xsmtpsib-…). Usa una clave de API "
+                               "(xkeysib-…) de Brevo: SMTP & API → pestaña API Keys.")
         payload = {
             'sender': _contact(message.from_email or settings.DEFAULT_FROM_EMAIL),
             'to': _contacts(message.to),

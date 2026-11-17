@@ -49,3 +49,13 @@ class BrevoBackendTests(SimpleTestCase):
                 return_value=mock.Mock(status_code=400, text='error'))
     def test_fail_silently(self, post):
         self.assertEqual(EmailMessage('Hola', 'x', None, ['a@example.com']).send(fail_silently=True), 0)
+
+
+@override_settings(EMAIL_BACKEND='cafeteria_irazu.email_backends.BrevoEmailBackend',
+                   BREVO_API_KEY='xsmtpsib-clave-smtp', DEFAULT_FROM_EMAIL='cafe@example.com')
+class BrevoWrongKeyTests(SimpleTestCase):
+    @mock.patch('cafeteria_irazu.email_backends.requests.post')
+    def test_smtp_key_gives_clear_error(self, post):
+        with self.assertRaisesMessage(RuntimeError, 'clave SMTP'):
+            EmailMessage('Hola', 'x', None, ['a@example.com']).send()
+        post.assert_not_called()

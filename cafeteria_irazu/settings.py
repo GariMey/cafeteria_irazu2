@@ -155,7 +155,7 @@ GOOGLE_PAY_ENVIRONMENT = 'TEST'
 
 # CORREO: Brevo (API HTTPS) > Gmail (SMTP) > SendGrid > consola
 # En Render gratis el SMTP está bloqueado: allí se usa Brevo (BREVO_API_KEY).
-BREVO_API_KEY = config('BREVO_API_KEY', default='')
+BREVO_API_KEY = config('BREVO_API_KEY', default='').strip().strip('"\'').strip()
 GMAIL_APP_PASSWORD = config('GMAIL_APP_PASSWORD', default='')
 SENDGRID_API_KEY = config('SENDGRID_API_KEY', default='')
 # Si el servidor de correo no responde, se corta a los 10 s en vez de colgar
