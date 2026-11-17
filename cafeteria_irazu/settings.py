@@ -1,15 +1,18 @@
 import os
-import dj_database_url
-import cloudinary
-import cloudinary.uploader
-import cloudinary.api
 from pathlib import Path
+
+import dj_database_url
 from decouple import config
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-SECRET_KEY = 'django-insecure-cafeteria-irazu-cartago-costa-rica-2024'
-DEBUG = os.getenv('DEBUG', 'False') == 'True'
-ALLOWED_HOSTS = ['*']
+
+# VARIABLES DE ENTORNO
+# Todas las claves vienen del entorno (.env en local, "Environment" en Render);
+# ninguna se escribe en el código.
+
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-cafeteria-irazu-cartago-costa-rica-2024')
+DEBUG = config('DEBUG', default=False, cast=bool)
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*').split(',')
 CSRF_TRUSTED_ORIGINS = [
     'https://cafeteria-irazu2.onrender.com',
     'https://cafeteria-irazu2-4tub.onrender.com',
@@ -24,14 +27,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'cloudinary_storage',
-    'cloudinary',
     'cafeteria',
     'cart',
     'bookings',
     'newsletter',
     'payments',
     'dashboard',
+    'panel',
 ]
 
 MIDDLEWARE = [
@@ -66,9 +68,10 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'cafeteria_irazu.wsgi.application'
 
+# BASE DE DATOS: PostgreSQL en Render (DATABASE_URL) o SQLite en local
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.getenv('DATABASE_URL'),
+        default=config('DATABASE_URL', default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}"),
         conn_max_age=600,
     )
 }
@@ -88,23 +91,66 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# ALMACENAMIENTO DE ARCHIVOS
+# Las imágenes subidas (productos, galería, experiencia) van a Cloudinary si hay
+# credenciales; si no, a la carpeta media/ local. Se aceptan dos formas:
+#   CLOUDINARY_URL=cloudinary://API_KEY:API_SECRET@CLOUD_NAME
+#   o CLOUDINARY_CLOUD_NAME + CLOUDINARY_API_KEY + CLOUDINARY_API_SECRET
+# (Django 6 usa STORAGES; DEFAULT_FILE_STORAGE y STATICFILES_STORAGE ya no existen.)
+CLOUDINARY_URL = config('CLOUDINARY_URL', default='')
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME', default=''),
+    'API_KEY': config('CLOUDINARY_API_KEY', default=''),
+    'API_SECRET': config('CLOUDINARY_API_SECRET', default=''),
+}
+
+STORAGES = {
+    'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
+    'staticfiles': {'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'},
+}
+
+if CLOUDINARY_URL or all(CLOUDINARY_STORAGE.values()):
+    if CLOUDINARY_URL:
+        # La librería de Cloudinary lee esta variable desde el entorno del sistema
+        os.environ.setdefault('CLOUDINARY_URL', CLOUDINARY_URL)
+        CLOUDINARY_STORAGE = {}
+    INSTALLED_APPS += ['cloudinary_storage', 'cloudinary']
+    STORAGES['default'] = {'BACKEND': 'cloudinary_storage.storage.MediaCloudinaryStorage'}
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME', 'dkm1zpb2l'),
-    'API_KEY': os.getenv('CLOUDINARY_API_KEY', '313624234974938'),
-    'API_SECRET': os.getenv('CLOUDINARY_API_SECRET', 'jvkLAQdYe2dORdlzSEVq_HTw49g'),
-}
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+# PEDIDOS
+IVA_RATE = '0.13'        # IVA de Costa Rica (13 %)
+DELIVERY_FEE = '1500'    # Costo de envío a domicilio en colones
+ORDER_CONTACT_RETENTION_DAYS = 7  # Respaldo: borra el contacto de pedidos abiertos más tiempo
 
+# MÉTODOS DE PAGO
+SINPE_NUMBER = config('SINPE_NUMBER', default='6353-1551')         # Número que recibe los SINPE
+SINPE_HOLDER = config('SINPE_HOLDER', default='Cafetería Irazú')   # Nombre del titular
+# Google Pay en entorno de prueba: abre la ventana real pero nunca cobra
+GOOGLE_PAY_ENVIRONMENT = 'TEST'
+
+# CORREO: Gmail (contraseña de aplicación) > SendGrid > consola
+GMAIL_APP_PASSWORD = config('GMAIL_APP_PASSWORD', default='')
 SENDGRID_API_KEY = config('SENDGRID_API_KEY', default='')
+# Si el servidor de correo no responde, se corta a los 10 s en vez de colgar
+# la petición (en Render eso provocaba "worker timeout").
+EMAIL_TIMEOUT = 10
 
-if SENDGRID_API_KEY:
+if GMAIL_APP_PASSWORD:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = 'smtp.gmail.com'
+    EMAIL_PORT = 587
+    EMAIL_USE_TLS = True
+    EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='cuaderno.melanygr@gmail.com')
+    EMAIL_HOST_PASSWORD = GMAIL_APP_PASSWORD
+    DEFAULT_FROM_EMAIL = f'Cafetería Irazú <{EMAIL_HOST_USER}>'
+    CAFE_EMAIL = EMAIL_HOST_USER
+elif SENDGRID_API_KEY:
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
     EMAIL_HOST = 'smtp.sendgrid.net'
     EMAIL_PORT = 587

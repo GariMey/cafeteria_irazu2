@@ -1,0 +1,42 @@
+{% extends 'panel/base.html' %}
+
+{% block title %}La Experiencia Irazú{% endblock %}
+
+{% block content %}
+<div class="flex flex-wrap items-end justify-between gap-3 mb-4">
+    <div>
+        <h1 class="font-display text-3xl">La Experiencia Irazú</h1>
+        <p class="text-sm text-espresso/60">Las tarjetas de la sección «Por qué elegirnos» de la página de inicio.</p>
+    </div>
+    <div class="flex gap-2">
+        <a href="{% url 'home' %}#experiencia" target="_blank" class="rounded-lg border border-latte/40 bg-white px-4 py-2 text-sm">Ver en el sitio ↗</a>
+        <a href="{% url 'panel:experience_new' %}" class="rounded-lg bg-espresso text-crema px-4 py-2 font-semibold hover:bg-cafe">+ Nueva tarjeta</a>
+    </div>
+</div>
+
+<div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    {% for feature in features %}
+    <a href="{% url 'panel:experience_edit' feature.pk %}"
+       class="group bg-espresso text-crema rounded-2xl overflow-hidden shadow-sm hover:ring-4 hover:ring-latte/50 transition {% if not feature.active %}opacity-50{% endif %}">
+        <div class="aspect-[16/10] bg-white/5 overflow-hidden">
+            {% if feature.image_url %}
+            <img src="{{ feature.image_url }}" alt="{{ feature.title }}" loading="lazy" class="w-full h-full object-cover">
+            {% else %}
+            <div class="w-full h-full flex items-center justify-center text-5xl">{{ feature.icon|default:'🖼️' }}</div>
+            {% endif %}
+        </div>
+        <div class="p-4">
+            <div class="flex items-center justify-between gap-2 text-xs text-crema/50 mb-1">
+                <span>Orden {{ feature.order }}</span>
+                {% if not feature.active %}<span class="rounded-full bg-white/10 px-2 py-0.5">Oculta</span>{% endif %}
+            </div>
+            <h3 class="font-display text-xl flex items-center gap-2">{% if feature.icon %}<span>{{ feature.icon }}</span>{% endif %}{{ feature.title }}</h3>
+            <p class="text-sm text-crema/60 mt-2 line-clamp-2">{{ feature.description }}</p>
+            <span class="inline-block mt-3 text-sm text-latte group-hover:underline">Editar →</span>
+        </div>
+    </a>
+    {% empty %}
+    <div class="sm:col-span-2 lg:col-span-3 xl:col-span-4 bg-white rounded-2xl p-10 text-center text-espresso/50">No hay tarjetas. Crea la primera.</div>
+    {% endfor %}
+</div>
+{% endblock %}

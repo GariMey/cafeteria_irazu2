@@ -1,0 +1,27 @@
+{% autoescape off %}{{ business.name }}
+{{ business.address }}
+Tel. {{ business.phone }} - {{ business.email }}
+
+FACTURA {{ invoice_number }}
+=================================================
+
+Hola {{ customer_name }}, tu pago fue confirmado.
+
+Cliente:          {{ customer_name }} ({{ customer_email }})
+Fecha de emisión: {{ issued_at|date:"d/m/Y H:i" }}
+Transacción:      {{ payment.transaction_id }}
+Medio de pago:    {{ payment_detail }}
+Entrega:          {{ payment.get_fulfillment_display }}
+
+PRODUCTOS
+{% for item in items %}   {{ item.quantity }}x {{ item.product_name }} (₡{{ item.price|floatformat:0 }} c/u) = ₡{{ item.get_subtotal|floatformat:0 }}
+{% endfor %}
+Subtotal:          ₡{{ payment.subtotal|floatformat:0 }}{% if is_delivery %}
+Envío a domicilio: ₡{{ payment.delivery_fee|floatformat:0 }}{% endif %}
+IVA ({{ tax_percent }}%):         ₡{{ payment.tax|floatformat:0 }}
+TOTAL PAGADO:      ₡{{ payment.amount|floatformat:0 }}
+
+¡Gracias por tu compra! Conserva este correo como comprobante.
+Comprobante de compra sin validez fiscal: no sustituye una factura electrónica del Ministerio de Hacienda.
+Tus datos de contacto se borran al entregar tu pedido; nunca guardamos los de tu tarjeta.
+{% endautoescape %}

@@ -1,7 +1,7 @@
 # D:\cafeteria_irazu_proyecto\cafeteria_irazu\cafeteria\admin.py
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Category, Product, GalleryImage, Testimonial, ContactMessage
+from .models import Category, Product, GalleryImage, Testimonial, ContactMessage, ExperienceFeature
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
@@ -20,6 +20,12 @@ class ProductAdmin(admin.ModelAdmin):
 class GalleryAdmin(admin.ModelAdmin):
     list_display = ['title', 'order']
     list_editable = ['order']
+
+@admin.register(ExperienceFeature)
+class ExperienceFeatureAdmin(admin.ModelAdmin):
+    list_display = ['title', 'icon', 'order', 'active']
+    list_editable = ['order', 'active']
+
 
 @admin.register(Testimonial)
 class TestimonialAdmin(admin.ModelAdmin):

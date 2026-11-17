@@ -1,0 +1,21 @@
+<div id="orders-list" data-newest="{{ newest_id }}" data-new-count="{{ counters.new_orders }}">
+    <section>
+        <h2 class="font-display text-xl mb-2">En curso <span class="text-espresso/40 text-lg">({{ active_orders|length }})</span></h2>
+        {% if active_orders %}
+        <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+            {% for order in active_orders %}{% include 'panel/_order_card.html' %}{% endfor %}
+        </div>
+        {% else %}
+        <div class="bg-white rounded-2xl p-8 text-center text-espresso/50">☕ No hay pedidos en curso.</div>
+        {% endif %}
+    </section>
+
+    {% if closed_orders %}
+    <details class="mt-6">
+        <summary class="cursor-pointer font-display text-xl mb-2">Cerrados recientemente</summary>
+        <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 opacity-80">
+            {% for order in closed_orders %}{% include 'panel/_order_card.html' %}{% endfor %}
+        </div>
+    </details>
+    {% endif %}
+</div>

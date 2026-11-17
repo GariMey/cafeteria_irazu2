@@ -1,0 +1,35 @@
+{% extends 'panel/base.html' %}
+
+{% block title %}Mensajes{% endblock %}
+
+{% block content %}
+<div class="flex flex-wrap items-end justify-between gap-3 mb-4">
+    <h1 class="font-display text-3xl">Mensajes</h1>
+    <nav class="flex gap-1 text-sm bg-white rounded-lg p-1 shadow-sm">
+        <a href="?ver=todos" class="px-3 py-1.5 rounded-md {% if show == 'todos' %}bg-espresso text-crema{% endif %}">Todos</a>
+        <a href="?ver=sin-leer" class="px-3 py-1.5 rounded-md {% if show == 'sin-leer' %}bg-espresso text-crema{% endif %}">Sin leer</a>
+        <a href="?ver=sin-responder" class="px-3 py-1.5 rounded-md {% if show == 'sin-responder' %}bg-espresso text-crema{% endif %}">Sin responder</a>
+    </nav>
+</div>
+
+<div class="bg-white rounded-2xl shadow-sm divide-y divide-crema">
+    {% for msg in contact_messages %}
+    <a href="{% url 'panel:message' msg.pk %}" class="flex gap-4 px-4 py-3 hover:bg-beige {% if not msg.read %}bg-latte/10{% endif %}">
+        <div class="pt-1.5">{% if not msg.read %}<span class="block w-2.5 h-2.5 rounded-full bg-red-500" title="Sin leer"></span>{% else %}<span class="block w-2.5 h-2.5"></span>{% endif %}</div>
+        <div class="flex-1 min-w-0">
+            <div class="flex flex-wrap justify-between gap-2">
+                <span class="{% if not msg.read %}font-bold{% else %}font-semibold{% endif %}">{{ msg.name }}</span>
+                <span class="text-xs text-espresso/50">{{ msg.created_at|date:"d/m/Y H:i" }}</span>
+            </div>
+            <div class="text-xs text-espresso/50">{{ msg.email }}</div>
+            <p class="text-sm text-espresso/70 truncate mt-1">{{ msg.message }}</p>
+        </div>
+        <div class="self-center">
+            {% if msg.replied_at %}<span class="text-xs rounded-full bg-green-100 text-green-800 px-2 py-1">Respondido</span>{% endif %}
+        </div>
+    </a>
+    {% empty %}
+    <div class="p-10 text-center text-espresso/50">✉️ No hay mensajes aquí.</div>
+    {% endfor %}
+</div>
+{% endblock %}

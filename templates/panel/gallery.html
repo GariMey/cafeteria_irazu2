@@ -1,0 +1,77 @@
+{% extends 'panel/base.html' %}
+
+{% block title %}Galería{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="font-display text-3xl">Galería</h1>
+    <p class="text-sm text-espresso/60">La página de inicio muestra las primeras {{ home_limit }} fotos según su orden.</p>
+</div>
+
+<!-- Subir fotos -->
+<form method="post" enctype="multipart/form-data" id="upload-form"
+      class="bg-white rounded-2xl shadow-sm p-4 mb-5 border-2 border-dashed border-latte/50">
+    {% csrf_token %}
+    <label for="{{ form.images.id_for_label }}" class="block font-semibold mb-1">📤 Subir fotos</label>
+    <p class="text-xs text-espresso/60 mb-3">Puedes elegir varias a la vez (hasta 12, máximo 5 MB cada una). Se agregan al final de la galería.</p>
+    {{ form.images }}
+    {% for error in form.images.errors %}<p class="text-xs text-red-700 mt-2">{{ error }}</p>{% endfor %}
+    <div id="upload-preview" class="grid grid-cols-4 sm:grid-cols-8 lg:grid-cols-12 gap-2 mt-3"></div>
+    <button class="mt-4 rounded-lg bg-espresso text-crema px-5 py-2 font-semibold hover:bg-cafe disabled:opacity-60" id="upload-button">Subir</button>
+</form>
+
+<!-- Fotos actuales -->
+{% if images %}
+<div class="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+    {% for image, form in images %}
+    <div class="bg-white rounded-2xl shadow-sm overflow-hidden {% if forloop.counter > home_limit %}opacity-60{% endif %}">
+        <div class="relative aspect-square bg-crema">
+            <img src="{{ image.image.url }}" alt="{{ image.title }}" loading="lazy" class="w-full h-full object-cover">
+            {% if forloop.counter > home_limit %}
+            <span class="absolute top-2 left-2 text-xs bg-espresso/80 text-crema rounded-full px-2 py-1">No se muestra en inicio</span>
+            {% endif %}
+        </div>
+        <form method="post" action="{% url 'panel:gallery_update' image.pk %}" class="p-2.5 space-y-2">
+            {% csrf_token %}
+            {{ form.title }}
+            <div class="flex items-center gap-2 text-sm">
+                <label for="{{ form.order.id_for_label }}">Orden</label> {{ form.order }}
+                <button class="ml-auto rounded-lg bg-crema px-3 py-1 text-sm font-semibold hover:bg-latte/40">Guardar</button>
+            </div>
+        </form>
+        <form method="post" action="{% url 'panel:gallery_delete' image.pk %}" class="px-2.5 pb-2.5"
+              onsubmit="return confirm('¿Eliminar esta foto de la galería?')">
+            {% csrf_token %}
+            <button class="text-xs text-red-700 hover:underline">Eliminar foto</button>
+        </form>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="bg-white rounded-2xl p-10 text-center text-espresso/50">🖼️ Todavía no hay fotos en la galería.</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+    const input = document.getElementById('{{ form.images.id_for_label }}');
+    const preview = document.getElementById('upload-preview');
+    input.addEventListener('change', () => {
+        preview.innerHTML = '';
+        [...input.files].slice(0, 12).forEach(file => {
+            const img = document.createElement('img');
+            img.className = 'aspect-square w-full object-cover rounded-lg';
+            img.alt = file.name;
+            img.src = URL.createObjectURL(file);
+            preview.appendChild(img);
+        });
+    });
+    document.getElementById('upload-form').addEventListener('submit', () => {
+        const button = document.getElementById('upload-button');
+        button.disabled = true;
+        button.textContent = 'Subiendo…';
+    });
+})();
+</script>
+{% endblock %}

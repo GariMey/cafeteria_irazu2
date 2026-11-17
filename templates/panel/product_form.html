@@ -1,0 +1,59 @@
+{% extends 'panel/base.html' %}
+
+{% block title %}{% if product %}Editar {{ product.name }}{% else %}Nuevo producto{% endif %}{% endblock %}
+
+{% block content %}
+<a href="{% url 'panel:products' %}" class="text-sm text-mocha hover:underline">← Volver a productos</a>
+<h1 class="font-display text-3xl mt-1 mb-4">{% if product %}Editar «{{ product.name }}»{% else %}Nuevo producto{% endif %}</h1>
+
+<div class="grid gap-6 lg:grid-cols-3">
+    <form method="post" enctype="multipart/form-data" class="lg:col-span-2 bg-white rounded-2xl shadow-sm p-5 space-y-4">
+        {% csrf_token %}
+        {% for error in form.non_field_errors %}<div class="rounded-lg bg-red-100 text-red-800 text-sm px-3 py-2">{{ error }}</div>{% endfor %}
+
+        <div class="grid gap-4 sm:grid-cols-2">
+        {% for field in form %}
+        <div class="{% if field.name == 'description' or field.name == 'image' %}sm:col-span-2{% endif %}">
+            {% if field.field.widget.input_type == 'checkbox' %}
+            <label class="flex items-start gap-3 cursor-pointer">
+                {{ field }}
+                <span><span class="font-semibold">{{ field.label }}</span>
+                {% if field.help_text %}<span class="block text-xs text-espresso/60">{{ field.help_text }}</span>{% endif %}</span>
+            </label>
+            {% else %}
+            <label for="{{ field.id_for_label }}" class="block text-sm font-semibold mb-1">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}<p class="text-xs text-espresso/60 mt-1">{{ field.help_text }}</p>{% endif %}
+            {% endif %}
+            {% for error in field.errors %}<p class="text-xs text-red-700 mt-1">{{ error }}</p>{% endfor %}
+        </div>
+        {% endfor %}
+        </div>
+
+        <div class="flex gap-3 pt-2">
+            <button class="rounded-lg bg-espresso text-crema px-5 py-2 font-semibold hover:bg-cafe">Guardar</button>
+            <a href="{% url 'panel:products' %}" class="rounded-lg border border-latte/40 px-5 py-2">Cancelar</a>
+        </div>
+    </form>
+
+    {% if product %}
+    <aside class="space-y-4">
+        <div class="bg-white rounded-2xl shadow-sm p-4">
+            <div class="text-sm font-semibold mb-2">Imagen actual</div>
+            {% if product.image_url %}
+            <img src="{{ product.image_url }}" alt="{{ product.name }}" class="rounded-lg w-full aspect-[4/3] object-cover">
+            {% else %}
+            <div class="rounded-lg bg-crema aspect-[4/3] flex items-center justify-center text-4xl">{{ product.category.icon }}</div>
+            {% endif %}
+        </div>
+        <form method="post" action="{% url 'panel:product_delete' product.pk %}" class="bg-white rounded-2xl shadow-sm p-4"
+              onsubmit="return confirm('¿Eliminar «{{ product.name|escapejs }}»? No se puede deshacer.')">
+            {% csrf_token %}
+            <div class="text-sm font-semibold mb-1">Eliminar producto</div>
+            <p class="text-xs text-espresso/60 mb-3">Si solo está agotado, mejor desmarca «Disponible».</p>
+            <button class="w-full rounded-lg border border-red-300 text-red-700 px-4 py-2 text-sm hover:bg-red-50">Eliminar</button>
+        </form>
+    </aside>
+    {% endif %}
+</div>
+{% endblock %}

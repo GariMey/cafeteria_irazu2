@@ -1,0 +1,25 @@
+{# Botón del menú del panel. Parámetros: url, key, label, badge (opcional) #}
+<a href="{{ url }}" {% if section == key %}aria-current="page"{% endif %}
+   class="group relative flex items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-sm whitespace-nowrap transition
+          focus:outline-none focus-visible:ring-2 focus-visible:ring-latte
+          {% if section == key %}bg-latte text-espresso font-semibold shadow-md shadow-black/30
+          {% else %}bg-white/5 text-crema/90 border border-white/10 hover:bg-white/15 hover:text-crema hover:border-latte/50{% endif %}">
+    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true">
+        {% if key == 'orders' %}
+        <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+        {% elif key == 'products' %}
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 9h13v4a6 6 0 01-6 6h-1a6 6 0 01-6-6V9zm13 1h1.5a2.5 2.5 0 010 5H17M7 3v3m4-3v3m4-3v3"/>
+        {% elif key == 'gallery' %}
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.6-4.6a2 2 0 012.8 0L16 16m-2-2l1.6-1.6a2 2 0 012.8 0L20 14M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2zm8-12h.01"/>
+        {% elif key == 'experience' %}
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3 20l6.5-11 4 6.5L16 12l5 8H3zm6.5-11L11 6.5"/>
+        {% elif key == 'inbox' %}
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.9 5.3a2 2 0 002.2 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+        {% endif %}
+    </svg>
+    <span>{{ label }}</span>
+    {% if badge %}
+    <span class="min-w-[1.25rem] rounded-full bg-red-500 px-1.5 py-px text-[11px] font-bold text-white text-center ring-2 ring-espresso"
+          aria-label="{{ badge }} pendiente{{ badge|pluralize }}">{{ badge }}</span>
+    {% endif %}
+</a>

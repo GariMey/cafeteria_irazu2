@@ -1,0 +1,53 @@
+{% extends 'panel/base.html' %}
+
+{% block title %}Mensaje de {{ message.name }}{% endblock %}
+
+{% block content %}
+<a href="{% url 'panel:inbox' %}" class="text-sm text-mocha hover:underline">← Volver a mensajes</a>
+
+<div class="grid gap-6 lg:grid-cols-5 mt-2">
+    <!-- Mensaje recibido -->
+    <section class="lg:col-span-2 space-y-4">
+        <div class="bg-white rounded-2xl shadow-sm p-4">
+            <div class="font-display text-2xl">{{ message.name }}</div>
+            <div class="text-sm"><a class="underline" href="mailto:{{ message.email }}">{{ message.email }}</a></div>
+            {% if message.phone %}<div class="text-sm">📞 {{ message.phone }}</div>{% endif %}
+            <div class="text-xs text-espresso/50 mt-1">{{ message.created_at|date:"d/m/Y H:i" }}</div>
+            <p class="mt-4 whitespace-pre-line text-sm leading-relaxed">{{ message.message }}</p>
+        </div>
+
+        {% if message.replied_at %}
+        <div class="bg-green-50 border border-green-200 rounded-2xl p-4">
+            <div class="text-xs text-green-800 font-semibold mb-2">Tu respuesta · {{ message.replied_at|date:"d/m/Y H:i" }}</div>
+            <p class="whitespace-pre-line text-sm">{{ message.reply }}</p>
+        </div>
+        {% endif %}
+
+        <div class="flex gap-2">
+            <form method="post" action="{% url 'panel:message_action' message.pk %}">{% csrf_token %}
+                <input type="hidden" name="action" value="unread">
+                <button class="rounded-lg border border-latte/40 bg-white px-3 py-2 text-sm">Marcar no leído</button>
+            </form>
+            <form method="post" action="{% url 'panel:message_action' message.pk %}" onsubmit="return confirm('¿Eliminar este mensaje?')">{% csrf_token %}
+                <input type="hidden" name="action" value="delete">
+                <button class="rounded-lg border border-red-300 text-red-700 bg-white px-3 py-2 text-sm">Eliminar</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Responder -->
+    <form method="post" class="lg:col-span-3 bg-white rounded-2xl shadow-sm p-4 space-y-4 h-fit">
+        {% csrf_token %}
+        <h2 class="font-display text-2xl">{% if message.replied_at %}Enviar otra respuesta{% else %}Responder{% endif %}</h2>
+        <p class="text-xs text-espresso/60">Se envía a <strong>{{ message.email }}</strong>. Si el cliente contesta, su respuesta llega al correo de la cafetería (Gmail).</p>
+        {% for field in form %}
+        <div>
+            <label for="{{ field.id_for_label }}" class="block text-sm font-semibold mb-1">{{ field.label }}</label>
+            {{ field }}
+            {% for error in field.errors %}<p class="text-xs text-red-700 mt-1">{{ error }}</p>{% endfor %}
+        </div>
+        {% endfor %}
+        <button class="rounded-lg bg-espresso text-crema px-6 py-2.5 font-semibold hover:bg-cafe">Enviar respuesta</button>
+    </form>
+</div>
+{% endblock %}

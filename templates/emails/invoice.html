@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="es">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Factura {{ invoice_number }}</title></head>
+<body style="margin:0;padding:0;background:#f5ede3;font-family:Arial,Helvetica,sans-serif;color:#2c1a0e;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f5ede3;padding:24px 12px;">
+<tr><td align="center">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-radius:12px;overflow:hidden;">
+
+    <!-- Encabezado -->
+    <tr><td style="background:#2c1a0e;padding:24px 28px;color:#fdf6ee;">
+        <table role="presentation" width="100%"><tr>
+            <td>
+                <div style="font-size:22px;font-weight:bold;">☕ {{ business.name }}</div>
+                <div style="font-size:12px;color:#c4956a;margin-top:4px;">{{ business.address }}</div>
+                <div style="font-size:12px;color:#c4956a;">Tel. {{ business.phone }} · {{ business.email }}</div>
+            </td>
+            <td align="right" style="vertical-align:top;">
+                <div style="font-size:12px;letter-spacing:2px;color:#c4956a;">FACTURA</div>
+                <div style="font-size:18px;font-weight:bold;">{{ invoice_number }}</div>
+            </td>
+        </tr></table>
+    </td></tr>
+
+    <!-- Datos -->
+    <tr><td style="padding:24px 28px 8px;">
+        <p style="margin:0 0 16px;font-size:15px;">Hola {{ customer_name }}, tu pago fue confirmado. Este es el detalle de tu compra.</p>
+        <table role="presentation" width="100%" style="font-size:13px;">
+            <tr>
+                <td style="padding:4px 0;color:#7a5c44;">Cliente</td>
+                <td style="padding:4px 0;" align="right">{{ customer_name }}<br><span style="color:#7a5c44;">{{ customer_email }}</span></td>
+            </tr>
+            <tr><td style="padding:4px 0;color:#7a5c44;">Fecha de emisión</td><td style="padding:4px 0;" align="right">{{ issued_at|date:"d/m/Y H:i" }}</td></tr>
+            <tr><td style="padding:4px 0;color:#7a5c44;">Transacción</td><td style="padding:4px 0;font-family:monospace;" align="right">{{ payment.transaction_id }}</td></tr>
+            <tr><td style="padding:4px 0;color:#7a5c44;">Medio de pago</td><td style="padding:4px 0;" align="right">{{ payment_detail }}</td></tr>
+            <tr><td style="padding:4px 0;color:#7a5c44;">Entrega</td><td style="padding:4px 0;" align="right">{{ payment.get_fulfillment_display }}</td></tr>
+        </table>
+    </td></tr>
+
+    <!-- Productos -->
+    <tr><td style="padding:16px 28px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:13px;border-collapse:collapse;">
+            <tr style="background:#f5ede3;">
+                <th align="left" style="padding:8px;">Producto</th>
+                <th align="center" style="padding:8px;">Cant.</th>
+                <th align="right" style="padding:8px;">Precio</th>
+                <th align="right" style="padding:8px;">Total</th>
+            </tr>
+            {% for item in items %}
+            <tr>
+                <td style="padding:8px;border-bottom:1px solid #eee;">{{ item.product_name }}</td>
+                <td align="center" style="padding:8px;border-bottom:1px solid #eee;">{{ item.quantity }}</td>
+                <td align="right" style="padding:8px;border-bottom:1px solid #eee;">₡{{ item.price|floatformat:0 }}</td>
+                <td align="right" style="padding:8px;border-bottom:1px solid #eee;">₡{{ item.get_subtotal|floatformat:0 }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </td></tr>
+
+    <!-- Totales -->
+    <tr><td style="padding:0 28px 24px;">
+        <table role="presentation" width="100%" style="font-size:14px;">
+            <tr><td style="padding:3px 0;color:#7a5c44;">Subtotal</td><td align="right">₡{{ payment.subtotal|floatformat:0 }}</td></tr>
+            {% if is_delivery %}
+            <tr><td style="padding:3px 0;color:#7a5c44;">Envío a domicilio</td><td align="right">₡{{ payment.delivery_fee|floatformat:0 }}</td></tr>
+            {% endif %}
+            <tr><td style="padding:3px 0;color:#7a5c44;">IVA ({{ tax_percent }}%)</td><td align="right">₡{{ payment.tax|floatformat:0 }}</td></tr>
+            <tr>
+                <td style="padding:10px 0 0;font-size:18px;font-weight:bold;border-top:2px solid #2c1a0e;">Total pagado</td>
+                <td align="right" style="padding:10px 0 0;font-size:18px;font-weight:bold;border-top:2px solid #2c1a0e;color:#8b5a2b;">₡{{ payment.amount|floatformat:0 }}</td>
+            </tr>
+        </table>
+    </td></tr>
+
+    <!-- Pie -->
+    <tr><td style="background:#f5ede3;padding:16px 28px;font-size:11px;color:#7a5c44;line-height:1.5;">
+        ¡Gracias por tu compra! Conserva este correo como comprobante.<br>
+        Comprobante de compra sin validez fiscal: no sustituye una factura electrónica del Ministerio de Hacienda.<br>
+        Tus datos de contacto se borran al entregar tu pedido; nunca guardamos los de tu tarjeta.
+    </td></tr>
+</table>
+</td></tr>
+</table>
+</body>
+</html>
