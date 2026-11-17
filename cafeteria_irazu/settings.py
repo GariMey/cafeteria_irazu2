@@ -62,7 +62,7 @@ import dj_database_url
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL', 'postgresql://postgres:GRivera1276@localhost:5432/cafeteria_db')
+        default=config('DATABASE_URL', default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}")
     )
 }
 
@@ -81,12 +81,37 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# ALMACENAMIENTO DE ARCHIVOS
+# Si existe CLOUDINARY_URL, las imágenes subidas (productos, galería) se guardan
+# en Cloudinary; si no, se guardan en la carpeta media/ local.
+CLOUDINARY_URL = config('CLOUDINARY_URL', default='')
+
+STORAGES = {
+    'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
+    'staticfiles': {'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'},
+}
+
+if CLOUDINARY_URL:
+    # La librería de Cloudinary lee la variable desde el entorno del sistema
+    os.environ.setdefault('CLOUDINARY_URL', CLOUDINARY_URL)
+    INSTALLED_APPS += ['cloudinary_storage', 'cloudinary']
+    STORAGES['default'] = {'BACKEND': 'cloudinary_storage.storage.MediaCloudinaryStorage'}
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# PEDIDOS
+IVA_RATE = '0.13'        # IVA de Costa Rica (13 %)
+DELIVERY_FEE = '1500'    # Costo de envío a domicilio en colones
+
+# MÉTODOS DE PAGO
+SINPE_NUMBER = config('SINPE_NUMBER', default='6353-1551')         # Número que recibe los SINPE
+SINPE_HOLDER = config('SINPE_HOLDER', default='Cafetería Irazú')   # Nombre del titular
+# Google Pay en entorno de prueba: abre la ventana real pero nunca cobra
+GOOGLE_PAY_ENVIRONMENT = 'TEST'
 
 
 # EMAIL CONFIGURATION CON SENDGRID
@@ -107,8 +132,19 @@ def send_sendgrid_email(subject, html_content, to_emails, from_email='cuaderno.m
         print(f"Error SendGrid: {e}")
         return False
 
-# O usar el backend oficial (si funciona)
-if SENDGRID_API_KEY:
+GMAIL_APP_PASSWORD = config('GMAIL_APP_PASSWORD', default='')
+
+if GMAIL_APP_PASSWORD:
+    # Envío directo por Gmail con contraseña de aplicación
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_HOST = 'smtp.gmail.com'
+    EMAIL_PORT = 587
+    EMAIL_USE_TLS = True
+    EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='cuaderno.melanygr@gmail.com')
+    EMAIL_HOST_PASSWORD = GMAIL_APP_PASSWORD
+    DEFAULT_FROM_EMAIL = f'Cafetería Irazú <{EMAIL_HOST_USER}>'
+    CAFE_EMAIL = EMAIL_HOST_USER
+elif SENDGRID_API_KEY:
     EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
     EMAIL_HOST = 'smtp.sendgrid.net'
     EMAIL_PORT = 587

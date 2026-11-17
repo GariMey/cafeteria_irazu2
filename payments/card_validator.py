@@ -21,6 +21,18 @@ class CardValidator:
         'DINERS_CLUB': r'^3(?:0[0-5]|[68][0-9])[0-9]{11}$',
         'JCB': r'^(?:2131|1800|35[0-9]{3})[0-9]{11}$',
     }
+
+    # Nombres legibles para mostrar al cliente
+    BRAND_NAMES = {
+        'VISA': 'Visa',
+        'MASTERCARD': 'Mastercard',
+        'AMERICAN_EXPRESS': 'American Express',
+        'DISCOVER': 'Discover',
+        'DINERS_CLUB': 'Diners Club',
+        'JCB': 'JCB',
+    }
+
+    MAX_YEARS_AHEAD = 20
     
     @classmethod
     def validate_card_number(cls, card_number):
@@ -34,10 +46,10 @@ class CardValidator:
         - tuple: (es_valido, mensaje, marca)
         """
         # Limpiar el número (quitar espacios y guiones)
-        cleaned = re.sub(r'[\s\-]', '', card_number)
-        
-        # Verificar que solo contiene dígitos
-        if not cleaned.isdigit():
+        cleaned = re.sub(r'[\s\-]', '', card_number or '')
+
+        # Verificar que solo contiene dígitos 0-9
+        if not (cleaned.isascii() and cleaned.isdecimal()):
             return False, "El número de tarjeta solo debe contener dígitos", None
         
         # Verificar longitud mínima (13 dígitos) y máxima (19 dígitos)
@@ -93,34 +105,30 @@ class CardValidator:
         Retorna:
         - tuple: (es_valido, mensaje, mes, año)
         """
-        # Limpiar la cadena
-        cleaned = re.sub(r'[\s/]', '', expiry_str)
-        
-        # Verificar formato
-        if len(cleaned) == 4:  # MMYY
-            month = int(cleaned[:2])
-            year = int(cleaned[2:4]) + 2000
-        elif len(cleaned) == 6:  # MMYYYY
-            month = int(cleaned[:2])
-            year = int(cleaned[2:6])
-        else:
-            return False, "Formato inválido. Use MM/AA o MM/AAAA", None, None
-        
+        # Solo se aceptan MM/AA o MM/AAAA (con o sin "/"); cualquier otra cosa
+        # se rechaza antes de convertir a número.
+        match = re.fullmatch(r'\s*(\d{2})\s*/?\s*(\d{2}|\d{4})\s*', expiry_str or '')
+        if not match:
+            return False, "Formato inválido. Use MM/AA", None, None
+
+        month = int(match.group(1))
+        year = int(match.group(2))
+        if year < 100:
+            year += 2000
+
         # Validar mes (1-12)
         if month < 1 or month > 12:
             return False, "Mes inválido (debe ser entre 01 y 12)", None, None
-        
-        # Validar que la tarjeta no haya expirado
+
+        # La tarjeta vale hasta el último día del mes indicado
         now = datetime.now()
-        current_year = now.year
-        current_month = now.month
-        
-        if year < current_year:
+        if (year, month) < (now.year, now.month):
             return False, f"La tarjeta expiró en {month:02d}/{year}", month, year
-        
-        if year == current_year and month < current_month:
-            return False, f"La tarjeta expiró en {month:02d}/{year}", month, year
-        
+
+        # Ninguna tarjeta se emite con más de 20 años de vigencia
+        if year > now.year + cls.MAX_YEARS_AHEAD:
+            return False, "La fecha de expiración no es válida", month, year
+
         return True, "Fecha de expiración válida", month, year
     
     @classmethod
@@ -136,10 +144,11 @@ class CardValidator:
         - tuple: (es_valido, mensaje)
         """
         # Limpiar
-        cleaned = re.sub(r'\s', '', cvv)
-        
-        # Verificar que solo contiene dígitos
-        if not cleaned.isdigit():
+        cleaned = re.sub(r'\s', '', cvv or '')
+
+        # Verificar que solo contiene dígitos (isdecimal no acepta '²' ni otros
+        # caracteres Unicode que isdigit sí aceptaría)
+        if not (cleaned.isascii() and cleaned.isdecimal()):
             return False, "El CVV solo debe contener dígitos"
         
         # American Express usa 4 dígitos, el resto 3

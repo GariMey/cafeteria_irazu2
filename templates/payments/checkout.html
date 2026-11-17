@@ -8,80 +8,134 @@
     <div class="max-w-6xl mx-auto px-6">
         <div class="text-center mb-12">
             <div class="font-body text-xs text-latte tracking-[0.4em] uppercase mb-4">Pago seguro</div>
-            <h1 class="font-display text-5xl md:text-6xl text-crema mb-4">Proceder al Pago</h1>
-            <p class="font-body text-crema/50">Complete sus datos para finalizar la compra</p>
+            <h1 class="font-display text-5xl md:text-6xl text-crema mb-4">Finalizar Pedido</h1>
+            <p class="font-body text-crema/50">Elige cómo recibirlo y completa el pago</p>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            <!-- Formulario de pago -->
+            <!-- Formulario -->
             <div class="bg-white/5 border border-latte/20 rounded-2xl p-6 md:p-8">
-                <h2 class="font-display text-2xl text-crema mb-6">Informacion de pago</h2>
-                
-                <form method="post" id="payment-form" class="space-y-5">
+                <form method="post" id="payment-form" class="space-y-8" novalidate>
                     {% csrf_token %}
-                    
-                    <!-- Datos personales -->
-                    <div class="space-y-4">
-                        <h3 class="font-body text-latte text-sm uppercase tracking-wider">Datos personales</h3>
-                        <div>
-                            <label class="block text-crema/80 text-sm mb-2">Nombre completo</label>
-                            <input type="text" name="customer_name" required class="payment-input" 
-                                   placeholder="Como aparece en tu cedula" value="{{ form_data.customer_name|default:'' }}">
-                        </div>
-                        <div>
-                            <label class="block text-crema/80 text-sm mb-2">Correo electronico</label>
-                            <input type="email" name="customer_email" required class="payment-input" 
-                                   placeholder="tu@email.com" value="{{ form_data.customer_email|default:'' }}">
-                        </div>
-                        <div>
-                            <label class="block text-crema/80 text-sm mb-2">Telefono</label>
-                            <input type="tel" name="customer_phone" class="payment-input" 
-                                   placeholder="Telefono de contacto" value="{{ form_data.customer_phone|default:'' }}">
-                        </div>
-                    </div>
 
-                    <!-- Datos de tarjeta -->
-                    <div class="space-y-4 pt-4 border-t border-latte/20">
-                        <h3 class="font-body text-latte text-sm uppercase tracking-wider">Datos de tarjeta</h3>
-                        
-                        <div>
-                            <label class="block text-crema/80 text-sm mb-2">Numero de tarjeta</label>
-                            <input type="text" name="card_number" id="card_number" required class="payment-input" 
-                                   placeholder="1234 5678 9012 3456" maxlength="19">
-                        </div>
-                        <div>
-                            <label class="block text-crema/80 text-sm mb-2">Nombre en la tarjeta</label>
-                            <input type="text" name="card_name" required class="payment-input" 
-                                   placeholder="Como aparece en la tarjeta">
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-crema/80 text-sm mb-2">Fecha expiracion</label>
-                                <input type="text" name="expiry_date" id="expiry_date" required class="payment-input" 
-                                       placeholder="MM/AA" maxlength="5">
-                            </div>
-                            <div>
-                                <label class="block text-crema/80 text-sm mb-2">CVV</label>
-                                <input type="text" name="cvv" id="cvv" required class="payment-input" 
-                                       placeholder="123" maxlength="4">
-                            </div>
-                        </div>
+                    {% if form.non_field_errors %}
+                    <div class="rounded-xl bg-red-500/10 border border-red-400/40 p-4 text-red-200 text-sm">
+                        {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
                     </div>
+                    {% endif %}
 
-                    <button type="submit" class="w-full bg-green-600 text-white py-3 rounded-xl font-semibold hover:bg-green-700 transition text-lg mt-6">
-                        Pagar ₡{{ total|floatformat:0 }}
+                    <!-- 1. Tipo de entrega -->
+                    <fieldset class="space-y-3">
+                        <legend class="font-body text-latte text-sm uppercase tracking-wider mb-3">1. {{ form.fulfillment.label }}</legend>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            {% for radio in form.fulfillment %}
+                            <label class="fulfillment-option cursor-pointer rounded-xl border border-latte/30 bg-white/5 p-4 flex gap-3 items-start hover:bg-white/10 transition">
+                                {{ radio.tag }}
+                                <span>
+                                    <span class="block text-crema font-semibold">
+                                        {% if radio.data.value == 'delivery' %}🛵{% else %}🏪{% endif %} {{ radio.choice_label }}
+                                    </span>
+                                    <span class="block text-crema/50 text-xs mt-1">
+                                        {% if radio.data.value == 'delivery' %}+₡{{ delivery_fee|floatformat:0 }} de envío{% else %}Sin costo · Cartago{% endif %}
+                                    </span>
+                                </span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                        {% for error in form.fulfillment.errors %}<p class="text-red-300 text-xs">{{ error }}</p>{% endfor %}
+
+                        <div id="delivery-fields" class="space-y-4 pt-2">
+                            {% include 'payments/_field.html' with field=form.delivery_address %}
+                            {% include 'payments/_field.html' with field=form.delivery_notes %}
+                        </div>
+                    </fieldset>
+
+                    <!-- 2. Datos de contacto -->
+                    <fieldset class="space-y-4 pt-6 border-t border-latte/20">
+                        <legend class="font-body text-latte text-sm uppercase tracking-wider mb-3">2. Datos de contacto</legend>
+                        {% include 'payments/_field.html' with field=form.customer_name %}
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {% include 'payments/_field.html' with field=form.customer_email %}
+                            {% include 'payments/_field.html' with field=form.customer_phone %}
+                        </div>
+                    </fieldset>
+
+                    <!-- 3. Método de pago -->
+                    <fieldset class="space-y-4 pt-6 border-t border-latte/20">
+                        <legend class="font-body text-latte text-sm uppercase tracking-wider mb-3">3. {{ form.payment_method.label }}</legend>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            {% for radio in form.payment_method %}
+                            <label class="method-option cursor-pointer rounded-xl border border-latte/30 bg-white/5 p-3 flex flex-col items-center gap-1 text-center hover:bg-white/10 transition" data-method="{{ radio.data.value }}">
+                                {{ radio.tag }}
+                                <span class="text-2xl" aria-hidden="true">
+                                    {% if radio.data.value == 'card' %}💳{% elif radio.data.value == 'sinpe' %}📱{% elif radio.data.value == 'google_pay' %}🌐{% else %}🍎{% endif %}
+                                </span>
+                                <span class="text-crema text-sm font-semibold">{{ radio.choice_label }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                        {% for error in form.payment_method.errors %}<p class="text-red-300 text-xs">{{ error }}</p>{% endfor %}
+                        {{ form.wallet_token }}{{ form.wallet_description }}
+
+                        <!-- Tarjeta -->
+                        <div class="method-panel space-y-4 pt-2" data-panel="card">
+                            <div class="flex items-center gap-2 text-crema/50 text-xs">
+                                Aceptamos Visa, Mastercard, American Express y más
+                                <span id="card-brand" class="text-xs bg-latte/20 text-crema px-2 py-0.5 rounded-full hidden"></span>
+                            </div>
+                            {% include 'payments/_field.html' with field=form.card_number %}
+                            {% include 'payments/_field.html' with field=form.card_name %}
+                            <div class="grid grid-cols-2 gap-4">
+                                {% include 'payments/_field.html' with field=form.expiry_date %}
+                                {% include 'payments/_field.html' with field=form.cvv %}
+                            </div>
+                        </div>
+
+                        <!-- SINPE Móvil -->
+                        <div class="method-panel space-y-4 pt-2" data-panel="sinpe">
+                            <div class="rounded-xl border border-latte/30 bg-latte/10 p-4 font-body text-sm text-crema/80 space-y-2">
+                                <p class="text-crema font-semibold">Cómo pagar con SINPE Móvil</p>
+                                <ol class="list-decimal list-inside space-y-1">
+                                    <li>Desde la app de tu banco, envía
+                                        <strong class="text-latte">₡<span data-total>{{ totals.total|floatformat:0 }}</span></strong> al número
+                                        <strong class="text-latte font-mono">{{ sinpe_number }}</strong>
+                                        <button type="button" id="copy-sinpe" class="ml-1 text-xs underline text-latte/80 hover:text-latte" data-number="{{ sinpe_number }}">copiar</button>
+                                    </li>
+                                    <li>A nombre de <strong>{{ sinpe_holder }}</strong>.</li>
+                                    <li>Escribe abajo el número de comprobante que te da el banco.</li>
+                                </ol>
+                                <p class="text-crema/50 text-xs">Tu pedido quedará pendiente y lo confirmaremos en cuanto veamos el depósito. Guardaremos tu nombre y correo solo hasta enviarte la factura; después se borran.</p>
+                            </div>
+                            {% include 'payments/_field.html' with field=form.sinpe_reference %}
+                        </div>
+
+                        <!-- Google Pay -->
+                        <div class="method-panel space-y-3 pt-2" data-panel="google_pay">
+                            <p class="font-body text-sm text-crema/70">Paga con las tarjetas guardadas en tu cuenta de Google o tu teléfono Android.</p>
+                            <p id="gpay-status" class="font-body text-xs text-crema/50"></p>
+                        </div>
+
+                        <!-- Apple Pay -->
+                        <div class="method-panel space-y-3 pt-2" data-panel="apple_pay">
+                            <p class="font-body text-sm text-crema/70">Paga con Face ID o Touch ID desde tu iPhone o Mac.</p>
+                            <p class="font-body text-xs text-crema/50">Modo demostración: Apple Pay real requiere una cuenta de comercio de Apple; aquí se simula la autorización.</p>
+                        </div>
+                    </fieldset>
+
+                    <button type="submit" id="pay-button" class="w-full bg-green-600 text-white py-3 rounded-xl font-semibold hover:bg-green-700 transition text-lg disabled:opacity-60 disabled:cursor-wait">
+                        <span id="pay-label">Pagar</span> ₡<span data-total>{{ totals.total|floatformat:0 }}</span>
                     </button>
-                    
-                    <p class="text-center text-crema/30 text-xs mt-4">
-                        Validacion real de tarjeta usando algoritmo Luhn. No se realizan cargos reales.
+
+                    <p class="text-center text-crema/30 text-xs">
+                        Pago simulado: ningún método realiza cargos reales. Google Pay funciona en su entorno de pruebas.
                     </p>
                 </form>
             </div>
 
             <!-- Resumen del pedido -->
-            <div class="bg-white/5 border border-latte/20 rounded-2xl p-6 md:p-8 h-fit">
+            <div class="bg-white/5 border border-latte/20 rounded-2xl p-6 md:p-8 h-fit lg:sticky lg:top-28">
                 <h2 class="font-display text-2xl text-crema mb-6">Resumen del pedido</h2>
-                
+
                 <div class="space-y-3 max-h-96 overflow-y-auto mb-6">
                     {% for item in cart.items.all %}
                     <div class="flex justify-between items-center py-2 border-b border-latte/20">
@@ -93,36 +147,38 @@
                     </div>
                     {% endfor %}
                 </div>
-                
+
                 <div class="space-y-3 pt-4 border-t border-latte/20">
                     <div class="flex justify-between text-crema/70">
                         <span>Subtotal</span>
-                        <span>₡{{ subtotal|floatformat:0 }}</span>
+                        <span>₡{{ totals.subtotal|floatformat:0 }}</span>
+                    </div>
+                    <div class="flex justify-between text-crema/70" id="delivery-row">
+                        <span>Envío a domicilio</span>
+                        <span>₡<span data-delivery>{{ totals.delivery_fee|floatformat:0 }}</span></span>
                     </div>
                     <div class="flex justify-between text-crema/70">
-                        <span>Servicio (10%)</span>
-                        <span>₡{{ service_charge|floatformat:0 }}</span>
+                        <span>IVA ({{ totals.tax_percent }}%)</span>
+                        <span>₡<span data-tax>{{ totals.tax|floatformat:0 }}</span></span>
                     </div>
                     <div class="flex justify-between text-2xl font-display text-crema pt-3 border-t border-latte/20">
                         <span>Total</span>
-                        <span class="text-latte text-3xl">₡{{ total|floatformat:0 }}</span>
+                        <span class="text-latte text-3xl">₡<span data-total>{{ totals.total|floatformat:0 }}</span></span>
                     </div>
                 </div>
-                
-                <div class="mt-6 pt-4 border-t border-latte/20">
-                    <div class="flex items-center gap-3 text-crema/40 text-xs">
-                        <span>🔒</span>
-                        <span>Pago 100% seguro - Validacion Luhn</span>
-                    </div>
-                    <div class="flex items-center gap-3 text-crema/30 text-xs mt-2">
-                        <span>✓</span>
-                        <span>No guardamos informacion de tu tarjeta</span>
-                    </div>
+
+                <div class="mt-6 pt-4 border-t border-latte/20 space-y-2 text-xs">
+                    <div class="flex items-center gap-3 text-crema/50"><span>🔒</span><span>No guardamos los datos de tu tarjeta</span></div>
+                    <div class="flex items-center gap-3 text-crema/50"><span>🛡️</span><span>Tu nombre, teléfono, correo y dirección solo se usan para este pedido y no se almacenan</span></div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+{# Totales calculados en el servidor para cada opción; el JS solo los muestra #}
+{{ pickup_totals|json_script:"totals-pickup" }}
+{{ delivery_totals|json_script:"totals-delivery" }}
 
 <style>
 .payment-input {
@@ -135,45 +191,240 @@
     font-family: 'Jost', sans-serif;
     transition: all 0.3s;
 }
-.payment-input:focus {
-    outline: none;
-    border-color: #c4956a;
-    background: rgba(255,255,255,0.15);
-}
-.payment-input::placeholder {
-    color: rgba(253, 246, 238, 0.4);
-}
+.payment-input:focus { outline: none; border-color: #c4956a; background: rgba(255,255,255,0.15); }
+.payment-input::placeholder { color: rgba(253, 246, 238, 0.4); }
+.has-error .payment-input { border-color: #fca5a5; background: rgba(239, 68, 68, 0.08); }
+.fulfillment-option:has(input:checked) { border-color: #c4956a; background: rgba(196, 149, 106, 0.18); }
+.fulfillment-option input { margin-top: 4px; accent-color: #c4956a; }
+.method-option:has(input:checked) { border-color: #c4956a; background: rgba(196, 149, 106, 0.18); }
+.method-option input { position: absolute; opacity: 0; pointer-events: none; }
+.method-option:has(input:focus-visible) { outline: 2px solid #c4956a; outline-offset: 2px; }
+.method-option.unavailable { opacity: .45; }
 </style>
+{{ google_pay_environment|json_script:"gpay-env" }}
+<script async src="https://pay.google.com/gp/p/js/pay.js"></script>
 
 <script>
-// Formatear numero de tarjeta
-const cardInput = document.getElementById('card_number');
-if (cardInput) {
-    cardInput.addEventListener('input', function(e) {
-        let value = e.target.value.replace(/\D/g, '');
-        value = value.replace(/(\d{4})(?=\d)/g, '$1 ');
-        e.target.value = value.substring(0, 19);
-    });
-}
+(function () {
+    const form = document.getElementById('payment-form');
+    const totals = {
+        pickup: JSON.parse(document.getElementById('totals-pickup').textContent),
+        delivery: JSON.parse(document.getElementById('totals-delivery').textContent),
+    };
+    // Mismo formato que floatformat:0 del resto del sitio (sin separador de miles)
+    const fmt = (v) => String(Math.round(Number(v)));
 
-// Formatear fecha
-const expiryInput = document.getElementById('expiry_date');
-if (expiryInput) {
-    expiryInput.addEventListener('input', function(e) {
-        let value = e.target.value.replace(/\D/g, '');
-        if (value.length >= 2) {
-            value = value.substring(0, 2) + '/' + value.substring(2, 4);
+    // ── Entrega: mostrar dirección y actualizar totales ──────────────────
+    const deliveryFields = document.getElementById('delivery-fields');
+    const deliveryRow = document.getElementById('delivery-row');
+    function updateFulfillment() {
+        const checked = form.querySelector('input[name="fulfillment"]:checked');
+        const mode = checked ? checked.value : 'pickup';
+        const t = totals[mode];
+        const isDelivery = mode === 'delivery';
+        deliveryFields.hidden = !isDelivery;
+        deliveryRow.hidden = !isDelivery;
+        document.getElementById('id_delivery_address').required = isDelivery;
+        document.querySelectorAll('[data-total]').forEach(el => el.textContent = fmt(t.total));
+        document.querySelectorAll('[data-tax]').forEach(el => el.textContent = fmt(t.tax));
+        document.querySelectorAll('[data-delivery]').forEach(el => el.textContent = fmt(t.delivery_fee));
+    }
+    form.querySelectorAll('input[name="fulfillment"]').forEach(r => r.addEventListener('change', updateFulfillment));
+    updateFulfillment();
+
+    // ── Tarjeta: formato y marca (la validación real ocurre en el servidor) ──
+    const brands = [
+        ['American Express', /^3[47]/, 15, 4],
+        ['Visa', /^4/, 16, 3],
+        ['Mastercard', /^(5[1-5]|2[2-7])/, 16, 3],
+        ['Discover', /^6(011|5)/, 16, 3],
+        ['Diners Club', /^3(0[0-5]|[68])/, 14, 3],
+        ['JCB', /^35/, 16, 3],
+    ];
+    const cardInput = document.getElementById('id_card_number');
+    const cvvInput = document.getElementById('id_cvv');
+    const brandBadge = document.getElementById('card-brand');
+
+    function luhn(num) {
+        let sum = 0;
+        for (let i = 0; i < num.length; i++) {
+            let d = Number(num[num.length - 1 - i]);
+            if (i % 2 === 1) { d *= 2; if (d > 9) d -= 9; }
+            sum += d;
         }
-        e.target.value = value.substring(0, 5);
-    });
-}
+        return num.length > 0 && sum % 10 === 0;
+    }
 
-// Limitar CVV
-const cvvInput = document.getElementById('cvv');
-if (cvvInput) {
-    cvvInput.addEventListener('input', function(e) {
-        e.target.value = e.target.value.replace(/\D/g, '').substring(0, 4);
+    cardInput.addEventListener('input', () => {
+        const digits = cardInput.value.replace(/\D/g, '').slice(0, 19);
+        const brand = brands.find(b => b[1].test(digits));
+        // Amex se agrupa 4-6-5; las demás de 4 en 4
+        cardInput.value = brand && brand[0] === 'American Express'
+            ? digits.replace(/^(\d{0,4})(\d{0,6})(\d{0,5}).*/, (m, a, b, c) => [a, b, c].filter(Boolean).join(' '))
+            : digits.replace(/(\d{4})(?=\d)/g, '$1 ');
+        brandBadge.hidden = !brand;
+        brandBadge.classList.toggle('hidden', !brand);
+        if (brand) brandBadge.textContent = brand[0];
+        cvvInput.maxLength = brand ? brand[3] : 4;
+        const complete = brand && digits.length >= brand[2];
+        cardInput.setCustomValidity(complete && !luhn(digits) ? 'Número de tarjeta inválido' : '');
     });
-}
+
+    const expiryInput = document.getElementById('id_expiry_date');
+    expiryInput.addEventListener('input', (e) => {
+        let v = expiryInput.value.replace(/\D/g, '').slice(0, 4);
+        if (v.length === 1 && Number(v) > 1) v = '0' + v;          // "4" -> "04"
+        if (v.length >= 3 || (v.length === 2 && e.inputType !== 'deleteContentBackward')) {
+            v = v.slice(0, 2) + '/' + v.slice(2);
+        }
+        expiryInput.value = v;
+    });
+
+    cvvInput.addEventListener('input', () => {
+        cvvInput.value = cvvInput.value.replace(/\D/g, '').slice(0, cvvInput.maxLength);
+    });
+
+    // ── Método de pago: mostrar el panel correcto ─────────────────────────
+    const payButton = document.getElementById('pay-button');
+    const payLabel = document.getElementById('pay-label');
+    const walletToken = document.getElementById('id_wallet_token');
+    const walletDescription = document.getElementById('id_wallet_description');
+    const cardRequired = ['id_card_number', 'id_card_name', 'id_expiry_date', 'id_cvv'];
+    const labels = { card: 'Pagar', sinpe: 'Ya hice el SINPE de', google_pay: 'Pagar con Google Pay', apple_pay: 'Pagar con Apple Pay' };
+
+    const currentMethod = () => (form.querySelector('input[name="payment_method"]:checked') || {}).value || 'card';
+    const currentTotal = () => {
+        const f = form.querySelector('input[name="fulfillment"]:checked');
+        return totals[f ? f.value : 'pickup'].total;
+    };
+
+    function updateMethod() {
+        const method = currentMethod();
+        document.querySelectorAll('.method-panel').forEach(p => p.hidden = p.dataset.panel !== method);
+        cardRequired.forEach(id => document.getElementById(id).required = method === 'card');
+        document.getElementById('id_sinpe_reference').required = method === 'sinpe';
+        payLabel.textContent = labels[method];
+    }
+    form.querySelectorAll('input[name="payment_method"]').forEach(r => r.addEventListener('change', updateMethod));
+    updateMethod();
+
+    document.getElementById('copy-sinpe').addEventListener('click', (e) => {
+        const btn = e.currentTarget;
+        navigator.clipboard?.writeText(btn.dataset.number.replace(/\D/g, '')).then(() => {
+            btn.textContent = '¡copiado!';
+            setTimeout(() => btn.textContent = 'copiar', 1500);
+        });
+    });
+
+    document.getElementById('id_sinpe_reference').addEventListener('input', (e) => {
+        e.target.value = e.target.value.replace(/\D/g, '').slice(0, 30);
+    });
+
+    // ── Google Pay (entorno de prueba: ventana real, sin cargos) ──────────
+    const gpayStatus = document.getElementById('gpay-status');
+    const gpayEnv = JSON.parse(document.getElementById('gpay-env').textContent);
+    const gpayCard = {
+        type: 'CARD',
+        parameters: {
+            allowedAuthMethods: ['PAN_ONLY', 'CRYPTOGRAM_3DS'],
+            allowedCardNetworks: ['VISA', 'MASTERCARD', 'AMEX', 'DISCOVER', 'JCB'],
+        },
+        tokenizationSpecification: {
+            // "example" es la pasarela de prueba oficial de Google
+            type: 'PAYMENT_GATEWAY',
+            parameters: { gateway: 'example', gatewayMerchantId: 'exampleGatewayMerchantId' },
+        },
+    };
+    let gpayClient = null;
+
+    function gpayReady() {
+        if (!window.google || !google.payments) return Promise.resolve(false);
+        gpayClient = gpayClient || new google.payments.api.PaymentsClient({ environment: gpayEnv });
+        return gpayClient.isReadyToPay({ apiVersion: 2, apiVersionMinor: 0, allowedPaymentMethods: [gpayCard] })
+            .then(r => r.result).catch(() => false);
+    }
+
+    function payWithGoogle() {
+        return gpayReady().then(ready => {
+            if (!ready) throw new Error('Google Pay no está disponible en este navegador.');
+            return gpayClient.loadPaymentData({
+                apiVersion: 2, apiVersionMinor: 0,
+                allowedPaymentMethods: [gpayCard],
+                merchantInfo: { merchantName: 'Cafetería Irazú' },
+                transactionInfo: {
+                    totalPriceStatus: 'FINAL',
+                    totalPrice: Number(currentTotal()).toFixed(2),
+                    currencyCode: 'CRC',
+                    countryCode: 'CR',
+                },
+            });
+        }).then(data => {
+            const info = data.paymentMethodData.info || {};
+            return {
+                token: data.paymentMethodData.tokenizationData.token,
+                description: [info.cardNetwork, info.cardDetails && `•••• ${info.cardDetails}`].filter(Boolean).join(' '),
+            };
+        });
+    }
+
+    // Mostrar si Google Pay está disponible cuando cargue su script
+    window.addEventListener('load', () => {
+        gpayReady().then(ready => {
+            gpayStatus.textContent = ready
+                ? 'Disponible en este navegador (entorno de prueba de Google: no se cobra).'
+                : 'Google Pay no está disponible en este navegador. Prueba en Chrome con una cuenta de Google o en Android.';
+            document.querySelector('.method-option[data-method="google_pay"]').classList.toggle('unavailable', !ready);
+        });
+    });
+
+    // ── Apple Pay (simulado: requiere cuenta de comercio de Apple) ────────
+    function payWithApple() {
+        const total = Math.round(Number(currentTotal()));
+        const ok = window.confirm(`Apple Pay (demostración)\n\nCafetería Irazú\nTotal: ₡${total}\n\n¿Autorizar el pago?`);
+        if (!ok) return Promise.reject(new Error('cancelado'));
+        const random = crypto.getRandomValues(new Uint32Array(2));
+        return Promise.resolve({ token: `demo-apple-pay-${random[0].toString(16)}${random[1].toString(16)}`, description: 'Demostración' });
+    }
+
+    // ── Envío del formulario ─────────────────────────────────────────────
+    let submitting = false;
+    form.addEventListener('submit', (e) => {
+        if (submitting) { e.preventDefault(); return; }
+        if (!form.checkValidity()) {
+            e.preventDefault();
+            form.reportValidity();
+            return;
+        }
+        const method = currentMethod();
+        if ((method === 'google_pay' || method === 'apple_pay') && !walletToken.value) {
+            // Primero se abre la billetera; al autorizar se envía el formulario
+            e.preventDefault();
+            payButton.disabled = true;
+            (method === 'google_pay' ? payWithGoogle() : payWithApple())
+                .then(result => {
+                    walletToken.value = result.token;
+                    walletDescription.value = (result.description || '').slice(0, 60);
+                    submitting = true;
+                    payButton.textContent = 'Procesando pago…';
+                    form.submit();
+                })
+                .catch(err => {
+                    payButton.disabled = false;
+                    // "CANCELED" = el usuario cerró la ventana de Google Pay
+                    if (err && err.statusCode !== 'CANCELED' && err.message !== 'cancelado') {
+                        alert(err.message || 'No se pudo completar el pago con la billetera.');
+                    }
+                });
+            return;
+        }
+        submitting = true;
+        payButton.disabled = true;
+        payButton.textContent = 'Procesando pago…';
+    });
+
+    // Si cambian el método o la entrega, un token anterior ya no aplica
+    form.querySelectorAll('input[name="payment_method"], input[name="fulfillment"]').forEach(r =>
+        r.addEventListener('change', () => { walletToken.value = ''; walletDescription.value = ''; }));
+})();
 </script>
 {% endblock %}

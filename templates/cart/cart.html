@@ -20,8 +20,8 @@
             <div class="flex flex-col md:flex-row items-center gap-4 p-6 border-b border-latte/20 last:border-0 hover:bg-white/5 transition">
                 <!-- Imagen -->
                 <div class="w-20 h-20 rounded-xl overflow-hidden bg-gradient-to-br from-cafe/50 to-espresso flex-shrink-0">
-                    {% if item.product.image %}
-                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="w-full h-full object-cover">
+                    {% if item.product.image_url %}
+                    <img src="{{ item.product.image_url }}" alt="{{ item.product.name }}" class="w-full h-full object-cover">
                     {% else %}
                     <div class="w-full h-full flex items-center justify-center text-3xl">☕</div>
                     {% endif %}
@@ -38,7 +38,7 @@
                     <form method="post" action="{% url 'cart:update_cart' item.id %}" class="update-form flex items-center gap-2" data-item-id="{{ item.id }}">
                         {% csrf_token %}
                         <button type="button" class="decr-btn w-8 h-8 rounded-full bg-latte/20 text-crema hover:bg-latte/30 transition text-lg">−</button>
-                        <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="10" 
+                        <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="{{ max_quantity }}" 
                                class="quantity-input w-16 text-center bg-white/10 text-crema border border-latte/30 rounded-lg py-1 focus:outline-none focus:border-latte">
                         <button type="button" class="incr-btn w-8 h-8 rounded-full bg-latte/20 text-crema hover:bg-latte/30 transition text-lg">+</button>
                         <button type="submit" class="update-btn hidden">Actualizar</button>
@@ -59,20 +59,30 @@
         
         <!-- Resumen -->
         <div class="bg-white/5 border border-latte/20 rounded-2xl p-6 md:p-8">
-            {% with subtotal=cart.get_total service_charge=cart.get_total|divisibleby:10 %}
             <div class="flex justify-between items-center mb-4 pb-4 border-b border-latte/20">
                 <span class="font-body text-crema/70">Subtotal</span>
-                <span class="font-display text-xl text-crema">₡{{ subtotal|floatformat:0 }}</span>
+                <span class="font-display text-xl text-crema">₡{{ totals.subtotal|floatformat:0 }}</span>
             </div>
             <div class="flex justify-between items-center mb-6 pb-4 border-b border-latte/20">
-                <span class="font-body text-crema/70">Servicio (+10%)</span>
-                <span class="font-display text-crema">₡{{ service_charge|floatformat:0 }}</span>
+                <span class="font-body text-crema/70">IVA ({{ totals.tax_percent }}%)</span>
+                <span class="font-display text-crema">₡{{ totals.tax|floatformat:0 }}</span>
             </div>
-            <div class="flex justify-between items-center mb-8">
+            <div class="flex justify-between items-center mb-4">
                 <span class="font-display text-2xl text-crema">Total</span>
-                <span class="font-display text-3xl text-latte">₡{{ subtotal|add:service_charge|floatformat:0 }}</span>
+                <span class="font-display text-3xl text-latte">₡{{ totals.total|floatformat:0 }}</span>
             </div>
-            {% endwith %}
+
+            <!-- Opciones de entrega (se eligen en el siguiente paso) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8 font-body text-sm">
+                <div class="rounded-xl border border-latte/20 bg-white/5 p-4">
+                    <div class="text-crema font-semibold">🏪 Recoger en tienda</div>
+                    <div class="text-crema/50">Sin costo adicional · Total ₡{{ totals.total|floatformat:0 }}</div>
+                </div>
+                <div class="rounded-xl border border-latte/20 bg-white/5 p-4">
+                    <div class="text-crema font-semibold">🛵 Entrega a domicilio</div>
+                    <div class="text-crema/50">+₡{{ delivery_fee|floatformat:0 }} de envío · Total ₡{{ delivery_totals.total|floatformat:0 }}</div>
+                </div>
+            </div>
             
             <div class="flex flex-col sm:flex-row gap-4">
                 <a href="{% url 'menu' %}" class="flex-1 text-center px-6 py-3 border-2 border-latte/50 text-crema rounded-xl hover:bg-white/5 transition font-semibold">
@@ -108,7 +118,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const updateQuantity = async (newQuantity) => {
             if (newQuantity < 1) newQuantity = 1;
-            if (newQuantity > 10) newQuantity = 10;
+            if (newQuantity > {{ max_quantity }}) newQuantity = {{ max_quantity }};
             quantityInput.value = newQuantity;
             
             const formData = new FormData();

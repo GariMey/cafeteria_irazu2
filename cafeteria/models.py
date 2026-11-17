@@ -1,5 +1,29 @@
+import unicodedata
+
+from django.conf import settings
 from django.db import models
+from django.templatetags.static import static
 from django.utils.text import slugify
+
+PRODUCT_IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.webp', '.avif'}
+
+
+def _normalize_image_name(name):
+    """'Café_Chorreado' y 'café chorreado' quedan iguales para compararlos."""
+    name = unicodedata.normalize('NFC', name).replace('_', ' ')
+    return ' '.join(name.split()).casefold()
+
+
+def _find_static_product_image(product_name):
+    """Nombre del archivo en static/img/ que corresponde al producto, o None."""
+    folder = settings.BASE_DIR / 'static' / 'img'
+    if not folder.is_dir():
+        return None
+    target = _normalize_image_name(product_name)
+    for path in folder.iterdir():
+        if path.suffix.lower() in PRODUCT_IMAGE_EXTENSIONS and _normalize_image_name(path.stem) == target:
+            return path.name
+    return None
 
 
 class Category(models.Model):
@@ -37,6 +61,19 @@ class Product(models.Model):
         verbose_name_plural = "Productos"
         ordering = ['category', 'name']
 
+    @property
+    def image_url(self):
+        """URL de la imagen del producto.
+
+        Usa la imagen subida desde el admin; si no hay, busca en static/img/
+        un archivo con el mismo nombre del producto (sin importar mayúsculas,
+        extensión ni si usa '_' en vez de espacios). Devuelve '' si no hay.
+        """
+        if self.image:
+            return self.image.url
+        filename = _find_static_product_image(self.name)
+        return static(f'img/{filename}') if filename else ''
+
     def __str__(self):
         return self.name
 
@@ -53,23 +90,6 @@ class GalleryImage(models.Model):
 
     def __str__(self):
         return self.title or f"Imagen {self.pk}"
-
-
-class Testimonial(models.Model):
-    RATING_CHOICES = [(i, '⭐' * i) for i in range(1, 6)]
-    name = models.CharField(max_length=100, verbose_name="Nombre")
-    comment = models.TextField(verbose_name="Comentario")
-    rating = models.IntegerField(choices=RATING_CHOICES, default=5, verbose_name="Calificación")
-    active = models.BooleanField(default=True, verbose_name="Activo")
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        verbose_name = "Testimonio"
-        verbose_name_plural = "Testimonios"
-        ordering = ['-created_at']
-
-    def __str__(self):
-        return f"{self.name} - {self.rating}⭐"
 
 
 class ContactMessage(models.Model):

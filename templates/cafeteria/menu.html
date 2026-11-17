@@ -39,8 +39,8 @@
             {% if product.available %}
             <div class="bg-white/5 border border-latte/20 rounded-2xl overflow-hidden hover:bg-white/10 transition-all duration-300 hover:-translate-y-1 group">
                 <div class="aspect-[4/3] bg-gradient-to-br from-cafe/50 to-espresso relative overflow-hidden">
-                    {% if product.image %}
-                    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                    {% if product.image_url %}
+                    <img src="{{ product.image_url }}" alt="{{ product.name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                     {% else %}
                     <div class="w-full h-full flex items-center justify-center"><span class="text-5xl opacity-20">{{ category.icon }}</span></div>
                     {% endif %}
