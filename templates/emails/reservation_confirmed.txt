@@ -1,0 +1,15 @@
+{% extends 'emails/base.txt' %}
+{% block content %}¡TU RESERVA ESTÁ CONFIRMADA!
+
+Hola {{ reservation.customer_name }},
+
+Tu mesa está apartada. Te esperamos:
+
+   Fecha:    {{ fecha }}
+   Hora:     {{ hora }}
+   Personas: {{ reservation.guests }}{% if reservation.table %}
+   Mesa:     {{ reservation.table.number }}{% endif %}
+   Lugar:    {{ cafe.address }}
+{% endblock %}
+{% block contact_title %}¿NO PUEDES VENIR?{% endblock %}
+{% block contact_text %}Avísanos para liberar la mesa{% if reference %} e indícanos {{ reference }}{% endif %}. ¡Gracias!{% endblock %}

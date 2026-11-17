@@ -1,0 +1,6 @@
+{% autoescape off %}{% for item in items %}   {{ item.quantity }}x {{ item.product_name }} (₡{{ item.price|floatformat:0 }} c/u) = ₡{{ item.get_subtotal|floatformat:0 }}
+{% endfor %}
+   Subtotal:          ₡{{ payment.subtotal|floatformat:0 }}{% if is_delivery %}
+   Envío a domicilio: ₡{{ payment.delivery_fee|floatformat:0 }}{% endif %}
+   IVA ({{ tax_percent }}%):         ₡{{ payment.tax|floatformat:0 }}
+   TOTAL:             ₡{{ payment.amount|floatformat:0 }}{% endautoescape %}

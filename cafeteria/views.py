@@ -1,10 +1,11 @@
 # D:\cafeteria_irazu_proyecto\cafeteria_irazu\cafeteria\views.py
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.core.mail import send_mail
+from django.utils import timezone
 from django.conf import settings
 from django.http import HttpResponseRedirect
 from .models import Category, Product, GalleryImage, Testimonial, ContactMessage, ExperienceFeature
+from .emails import try_send_branded
 from .forms import ContactForm, TestimonialForm
 
 def home(request):
@@ -33,61 +34,20 @@ def home(request):
             if contact_form.is_valid():
                 contact_message = contact_form.save()
                 
-                # Enviar email al dueno del cafe
-                try:
-                    send_mail(
-                        subject='Nuevo mensaje de contacto - Cafeteria Irazu',
-                        message=f"""
-NUEVO MENSAJE DE CONTACTO
+                # Aviso a la cafetería (responder le escribe al cliente) y acuse al cliente
+                fecha = timezone.localtime(contact_message.created_at).strftime('%d/%m/%Y %H:%M')
+                try_send_branded(
+                    f'Nuevo mensaje de {contact_message.name} - Cafetería Irazú', 'contact_new_cafe',
+                    {'msg': contact_message,
+                     'rows': [('Nombre', contact_message.name), ('Correo', contact_message.email),
+                              ('Teléfono', contact_message.phone or 'No indicado'), ('Fecha', fecha)]},
+                    [settings.CAFE_EMAIL], reply_to=[contact_message.email],
+                )
+                try_send_branded(
+                    'Recibimos tu mensaje - Cafetería Irazú', 'contact_received',
+                    {'msg': contact_message}, [contact_message.email],
+                )
 
-DATOS DEL CLIENTE:
-   Nombre: {contact_message.name}
-   Email: {contact_message.email}
-   Telefono: {contact_message.phone or 'No especificado'}
-
-MENSAJE:
-{contact_message.message}
-
-Fecha: {contact_message.created_at.strftime('%d/%m/%Y %H:%M')}
-
-Responder a: {contact_message.email}
-Llamar a: {contact_message.phone or 'No disponible'}
-
-Cafeteria Irazu - Cartago, Costa Rica
-                        """,
-                        from_email=settings.DEFAULT_FROM_EMAIL,
-                        recipient_list=[settings.CAFE_EMAIL] if hasattr(settings, 'CAFE_EMAIL') else ['melanygaritauu1276@gmail.com'],
-                        fail_silently=True,
-                    )
-                except Exception as e:
-                    print(f"Error al enviar email: {e}")
-                
-                # Enviar email de confirmacion al cliente
-                try:
-                    send_mail(
-                        subject='Hemos recibido tu mensaje - Cafeteria Irazu',
-                        message=f"""
-Hola {contact_message.name},
-
-Gracias por contactarnos. Hemos recibido tu mensaje y te responderemos a la brevedad.
-
-Tu mensaje fue:
-"{contact_message.message}"
-
-Tiempo estimado de respuesta: 24 horas
-
-Te esperamos pronto en Cafeteria Irazu.
-
-Saludos cordiales,
-El equipo de Cafeteria Irazu
-                        """,
-                        from_email=settings.DEFAULT_FROM_EMAIL,
-                        recipient_list=[contact_message.email],
-                        fail_silently=True,
-                    )
-                except Exception as e:
-                    print(f"Error al enviar email al cliente: {e}")
-                
                 messages.success(request, f'Gracias {contact_message.name}. Tu mensaje ha sido enviado. Te contactaremos pronto.')
                 return HttpResponseRedirect('/#contacto')
     

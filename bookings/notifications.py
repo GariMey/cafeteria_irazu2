@@ -1,75 +1,38 @@
-"""Correos al cliente cuando cambia el estado de su reserva."""
-import logging
-
+"""Correos de reservas (con el diseño de la cafetería: templates/emails/reservation_*)."""
 from django.conf import settings
-from django.core.mail import EmailMessage
 from django.utils import formats
 
-logger = logging.getLogger(__name__)
-
-CAFE_PHONE = '6353-1551'
+from cafeteria.emails import try_send_branded
 
 
-def _when(reservation):
-    fecha = formats.date_format(reservation.date, 'l j \\d\\e F')
-    hora = reservation.time.strftime('%I:%M %p').lstrip('0')
-    return fecha, hora
+def _context(reservation):
+    fecha = formats.date_format(reservation.date, 'l j \\d\\e F').capitalize()
+    hora = reservation.time.strftime('%I:%M %p').lstrip('0').replace('AM', 'a. m.').replace('PM', 'p. m.')
+    # Referencia neutra: se usa en "indícanos …" y en el mensaje de WhatsApp que escribe el cliente
+    return {'reservation': reservation, 'fecha': fecha, 'hora': hora}, f"la reserva del {fecha} ({hora})"
 
 
-def _send(reservation, subject, body):
-    """Envía el correo y devuelve True si salió. Nunca registra datos del cliente."""
-    message = EmailMessage(subject, body, settings.DEFAULT_FROM_EMAIL, [reservation.customer_email],
-                           reply_to=[settings.CAFE_EMAIL])
-    try:
-        message.send()
-        return True
-    except Exception:
-        logger.exception("No se pudo enviar el correo de la reserva %s", reservation.pk)
-        return False
+def _send_to_customer(reservation, subject, template):
+    context, reference = _context(reservation)
+    return try_send_branded(subject, template, context, [reservation.customer_email], reference=reference)
 
 
-def received_body(reservation):
-    fecha, hora = _when(reservation)
-    return f"""Hola {reservation.customer_name},
-
-¡Gracias por reservar en Cafetería Irazú! Recibimos tu solicitud:
-
-   Fecha: {fecha}
-   Hora: {hora}
-   Personas: {reservation.guests}
-
-Te enviaremos otro correo en cuanto confirmemos tu mesa.
-Si necesitas cambiar algo, llámanos al {CAFE_PHONE}.
-
-Cafetería Irazú - Cartago, Costa Rica
-"""
+def send_received(reservation):
+    return _send_to_customer(reservation, 'Recibimos tu reserva - Cafetería Irazú', 'reservation_received')
 
 
 def send_confirmed(reservation):
-    fecha, hora = _when(reservation)
-    mesa = f"\n   Mesa: {reservation.table.number}" if reservation.table else ""
-    return _send(reservation, 'Reserva confirmada - Cafetería Irazú', f"""Hola {reservation.customer_name},
-
-¡Tu reserva está confirmada! Te esperamos:
-
-   Fecha: {fecha}
-   Hora: {hora}
-   Personas: {reservation.guests}{mesa}
-
-Si no puedes venir, avísanos al {CAFE_PHONE} para liberar la mesa.
-
-Cafetería Irazú - Cartago, Costa Rica
-""")
+    return _send_to_customer(reservation, 'Reserva confirmada - Cafetería Irazú', 'reservation_confirmed')
 
 
 def send_cancelled(reservation):
-    fecha, hora = _when(reservation)
-    return _send(reservation, 'Reserva cancelada - Cafetería Irazú', f"""Hola {reservation.customer_name},
+    return _send_to_customer(reservation, 'Reserva cancelada - Cafetería Irazú', 'reservation_cancelled')
 
-Lamentamos informarte que tu reserva del {fecha} a las {hora} para {reservation.guests} persona(s)
-fue cancelada.
 
-Si quieres buscar otra fecha u hora, llámanos al {CAFE_PHONE} o vuelve a reservar en nuestro sitio.
-
-Cafetería Irazú - Cartago, Costa Rica
-""")
+def send_new_to_cafe(reservation):
+    context, reference = _context(reservation)
+    context['rows'] = [('Cliente', reservation.customer_name), ('Teléfono', reservation.customer_phone),
+                       ('Correo', reservation.customer_email)]
+    return try_send_branded('Nueva reserva - Cafetería Irazú', 'reservation_new_cafe', context,
+                            [settings.CAFE_EMAIL], reference=reference,
+                            reply_to=[reservation.customer_email])

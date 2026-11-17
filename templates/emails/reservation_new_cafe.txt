@@ -1,0 +1,11 @@
+{% extends 'emails/base.txt' %}
+{% block content %}NUEVA RESERVA (pendiente de confirmar)
+
+   Fecha:    {{ fecha }}
+   Hora:     {{ hora }}
+   Personas: {{ reservation.guests }}{% if reservation.special_requests %}
+   Notas:    {{ reservation.special_requests }}{% endif %}
+{% for label, value in rows %}   {{ label }}: {{ value }}
+{% endfor %}{% endblock %}
+{% block contact %}Confírmala o cancélala en el panel: {{ cafe.site_url }}/panel/reservas/?ver=pendientes
+{% endblock %}

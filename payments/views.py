@@ -2,19 +2,19 @@ import logging
 
 from django.conf import settings
 from django.contrib import messages
-from django.core.mail import send_mail
 from django.db import transaction
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.debug import sensitive_post_parameters
 
+from cafeteria.emails import try_send_branded
 from cart.models import Cart
 
 from .forms import SINPE, CheckoutForm
 from .invoices import send_invoice
 from .models import Payment, PaymentItem
-from .pricing import DELIVERY, calculate_totals, delivery_fee
+from .pricing import DELIVERY, calculate_totals, delivery_fee, iva_rate
 
 logger = logging.getLogger(__name__)
 
@@ -137,98 +137,42 @@ def _process_order(request, cart, form):
 
 
 def _send_confirmation_emails(payment, form):
-    """Envía los correos al cliente y a la cafetería.
+    """Envía la confirmación al cliente y el aviso de nuevo pedido a la cafetería.
 
     Los datos de contacto vienen del formulario; nunca se registran en los logs.
     """
     data = form.cleaned_data
-    metodo_pago = form.payment_summary
     is_sinpe = payment.payment_method == SINPE
-    is_delivery = payment.fulfillment == DELIVERY
     fecha = timezone.localtime(payment.created_at).strftime('%d/%m/%Y %H:%M')
+    context = {
+        'payment': payment,
+        'items': list(payment.items.all()),
+        'is_delivery': payment.fulfillment == DELIVERY,
+        'is_sinpe': is_sinpe,
+        'tax_percent': int(iva_rate() * 100),
+        'customer_name': data['customer_name'],
+        'delivery_address': data.get('delivery_address', ''),
+        'delivery_notes': data.get('delivery_notes', ''),
+    }
+    reference = f"el pedido {payment.transaction_id}"
 
-    productos = "\n".join(
-        f"   {item.quantity}x {item.product_name} - {_colones(item.get_subtotal())}"
-        for item in payment.items.all()
+    try_send_branded(
+        f'Pedido confirmado - {payment.transaction_id}', 'order_confirmation',
+        {**context, 'rows': [('Pedido', payment.transaction_id), ('Fecha', fecha),
+                             ('Pago', form.payment_summary),
+                             ('Entrega', payment.get_fulfillment_display())]},
+        [data['customer_email']], reference=reference,
     )
-    resumen = (
-        f"   Subtotal: {_colones(payment.subtotal)}\n"
-        + (f"   Envío a domicilio: {_colones(payment.delivery_fee)}\n" if is_delivery else "")
-        + f"   IVA (13%): {_colones(payment.tax)}\n"
-        f"   TOTAL PAGADO: {_colones(payment.amount)}"
+    try_send_branded(
+        f'NUEVO PEDIDO {payment.transaction_id} - {payment.get_fulfillment_display()} - '
+        f'{_colones(payment.amount)}', 'order_new_cafe',
+        {**context, 'rows': [('Cliente', data['customer_name']), ('Teléfono', data['customer_phone']),
+                             ('Correo', data['customer_email']), ('Fecha', fecha),
+                             ('Pago', form.payment_summary)]},
+        [settings.CAFE_EMAIL], reference=reference,
+        # Responder a este aviso le escribe directamente al cliente
+        reply_to=[data['customer_email']],
     )
-    if is_delivery:
-        entrega = f"ENTREGA A DOMICILIO\n   Dirección: {data['delivery_address']}"
-        if data.get('delivery_notes'):
-            entrega += f"\n   Indicaciones: {data['delivery_notes']}"
-    else:
-        entrega = "RECOGER EN TIENDA\n   Te avisaremos cuando tu pedido esté listo."
-
-    if is_sinpe:
-        estado_cliente = ("Recibimos tu pedido. Lo confirmaremos en cuanto verifiquemos "
-                          "el SINPE Móvil con el comprobante que indicaste;\n"
-                          "en ese momento te enviaremos la factura a este correo.")
-        accion_cafe = ("\n>>> ACCIÓN: verificar el SINPE con ese comprobante y marcar el pago "
-                       "como Completado en el admin.\n")
-    else:
-        estado_cliente = "Tu pedido fue confirmado. La factura te llega en un correo aparte."
-        accion_cafe = ""
-
-    mensaje_cliente = f"""Hola {data['customer_name']},
-
-Gracias por tu compra en Cafetería Irazú. {estado_cliente}
-
-PRODUCTOS:
-{productos}
-
-RESUMEN DE PAGO:
-{resumen}
-
-{entrega}
-
-Fecha: {fecha}
-Transacción: {payment.transaction_id}
-Pago: {metodo_pago}
-
-Por tu privacidad, tus datos de contacto se borran al entregar tu pedido; nunca guardamos los de tu tarjeta.
-
-Cafetería Irazú - Cartago, Costa Rica
-Teléfono: 6353-1551
-"""
-
-    mensaje_cafe = f"""NUEVO PEDIDO - {payment.get_fulfillment_display().upper()}
-
-CLIENTE:
-   Nombre: {data['customer_name']}
-   Correo: {data['customer_email']}
-   Teléfono: {data['customer_phone']}
-
-{entrega}
-
-PRODUCTOS:
-{productos}
-
-RESUMEN:
-{resumen}
-
-Fecha: {fecha}
-Transacción: {payment.transaction_id}
-Pago: {metodo_pago}
-{accion_cafe}
-Los datos del cliente se ven en el panel del negocio hasta entregar el pedido; luego se borran.
-"""
-
-    envios = [
-        (f'Pedido confirmado - {payment.transaction_id}', mensaje_cliente, data['customer_email']),
-        (f'NUEVO PEDIDO {payment.transaction_id} - {payment.get_fulfillment_display()} - '
-         f'{_colones(payment.amount)}', mensaje_cafe, settings.CAFE_EMAIL),
-    ]
-    for subject, body, recipient in envios:
-        try:
-            send_mail(subject, body, settings.DEFAULT_FROM_EMAIL, [recipient])
-        except Exception:
-            # No se registra el destinatario para no dejar datos personales en los logs
-            logger.exception("No se pudo enviar el correo del pedido %s", payment.transaction_id)
 
 
 def payment_success(request, payment_id):

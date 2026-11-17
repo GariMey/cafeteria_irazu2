@@ -142,6 +142,14 @@ if CLOUDINARY_URL or all(CLOUDINARY_STORAGE.values()):
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# DATOS DE CONTACTO DEL NEGOCIO (aparecen en los correos)
+CAFE_PHONE = config('CAFE_PHONE', default='6353-1551')
+CAFE_WHATSAPP = config('CAFE_WHATSAPP', default='50663531551')   # con código de país, sin + ni guiones
+CAFE_ADDRESS = config('CAFE_ADDRESS', default='Camino al Volcán Irazú, Cartago, Costa Rica')
+# Dirección pública del sitio para los enlaces de los correos
+SITE_URL = config('SITE_URL', default=f'https://{RENDER_EXTERNAL_HOSTNAME}' if RENDER_EXTERNAL_HOSTNAME
+                  else 'http://127.0.0.1:8000').rstrip('/')
+
 # PEDIDOS
 IVA_RATE = '0.13'        # IVA de Costa Rica (13 %)
 DELIVERY_FEE = '1500'    # Costo de envío a domicilio en colones

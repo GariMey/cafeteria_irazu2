@@ -1,0 +1,14 @@
+{% extends 'emails/base.html' %}
+{% block title %}Reserva confirmada{% endblock %}
+{% block preheader %}¡Te esperamos el {{ fecha }} a las {{ hora }}!{% endblock %}
+{% block hero_icon %}✅{% endblock %}
+{% block hero_title %}¡Tu reserva está confirmada!{% endblock %}
+{% block hero_subtitle %}Te esperamos{% endblock %}
+{% block content %}
+<p style="margin:0 0 12px;">Hola <strong>{{ reservation.customer_name }}</strong>,</p>
+<p style="margin:0 0 16px;">¡Todo listo! Tu mesa está apartada. Te esperamos con un café recién chorreado.</p>
+{% include 'emails/_reservation_box.html' %}
+<p style="margin:0 0 8px;font-size:14px;">📍 <strong>{{ cafe.address }}</strong></p>
+{% endblock %}
+{% block contact_title %}¿No puedes venir?{% endblock %}
+{% block contact_text %}Avísanos para liberar la mesa{% if reference %} e indícanos {{ reference }}{% endif %}. ¡Gracias!{% endblock %}

@@ -1,0 +1,16 @@
+{% extends 'emails/base.html' %}
+{% block title %}Reserva cancelada{% endblock %}
+{% block preheader %}Tu reserva del {{ fecha }} a las {{ hora }} fue cancelada.{% endblock %}
+{% block hero_icon %}📅{% endblock %}
+{% block hero_title %}Tu reserva fue cancelada{% endblock %}
+{% block hero_subtitle %}{{ fecha }} · {{ hora }}{% endblock %}
+{% block content %}
+<p style="margin:0 0 12px;">Hola <strong>{{ reservation.customer_name }}</strong>,</p>
+<p style="margin:0 0 16px;">Lamentamos informarte que tu reserva fue <strong>cancelada</strong>.</p>
+{% include 'emails/_reservation_box.html' %}
+<table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 8px;"><tr><td>
+    <a href="{{ cafe.site_url }}/bookings/" style="display:inline-block;background:#c4956a;color:#1a0f00;text-decoration:none;font-size:15px;font-weight:bold;padding:12px 22px;border-radius:8px;">Reservar otra fecha</a>
+</td></tr></table>
+{% endblock %}
+{% block contact_title %}¿Tienes preguntas?{% endblock %}
+{% block contact_text %}Escríbenos o llámanos y te ayudamos a encontrar otro horario.{% endblock %}

@@ -1,0 +1,13 @@
+{% extends 'emails/base.html' %}
+{% block title %}Recibimos tu reserva{% endblock %}
+{% block preheader %}{{ fecha }} a las {{ hora }} · Te confirmaremos tu mesa por correo.{% endblock %}
+{% block hero_icon %}📅{% endblock %}
+{% block hero_title %}¡Recibimos tu reserva!{% endblock %}
+{% block hero_subtitle %}Te confirmaremos tu mesa en breve{% endblock %}
+{% block content %}
+<p style="margin:0 0 12px;">Hola <strong>{{ reservation.customer_name }}</strong>,</p>
+<p style="margin:0 0 16px;">¡Gracias por elegirnos! Recibimos tu solicitud de reserva. Te enviaremos otro correo en cuanto confirmemos tu mesa.</p>
+{% include 'emails/_reservation_box.html' %}
+{% endblock %}
+{% block contact_title %}¿Necesitas cancelar o cambiar tu reserva?{% endblock %}
+{% block contact_text %}Avísanos lo antes posible{% if reference %} e indícanos {{ reference }}{% endif %}.{% endblock %}

@@ -1,0 +1,15 @@
+{% extends 'emails/base.txt' %}
+{% block content %}TU RESERVA FUE CANCELADA
+
+Hola {{ reservation.customer_name }},
+
+Lamentamos informarte que tu reserva fue cancelada:
+
+   Fecha:    {{ fecha }}
+   Hora:     {{ hora }}
+   Personas: {{ reservation.guests }}
+
+Puedes reservar otra fecha en {{ cafe.site_url }}/bookings/
+{% endblock %}
+{% block contact_title %}¿TIENES PREGUNTAS?{% endblock %}
+{% block contact_text %}Escríbenos o llámanos y te ayudamos a encontrar otro horario.{% endblock %}

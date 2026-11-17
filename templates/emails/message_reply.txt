@@ -1,0 +1,8 @@
+{% extends 'emails/base.txt' %}
+{% block content %}{{ body }}
+
+--- Tu mensaje del {{ original_date|date:"d/m/Y H:i" }} ---
+{{ quoted }}
+{% endblock %}
+{% block contact_title %}¿QUIERES SEGUIR CONVERSANDO?{% endblock %}
+{% block contact_text %}Responde a este correo, o escríbenos por WhatsApp si es urgente.{% endblock %}

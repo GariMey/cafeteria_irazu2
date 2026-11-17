@@ -9,10 +9,9 @@ Los datos de contacto del pedido se borran al entregarlo o cancelarlo
 """
 import logging
 
-from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
-from django.template.loader import render_to_string
 from django.utils import timezone
+
+from cafeteria.emails import send_branded
 
 from .pricing import DELIVERY, iva_rate
 
@@ -24,14 +23,6 @@ def payment_detail(payment):
     if payment.payment_method == 'sinpe':
         return f"SINPE Móvil - comprobante {payment.reference}"
     return payment.get_payment_method_display()
-
-
-def _send(subject, template, context, to_email):
-    text = render_to_string(f'emails/{template}.txt', context)
-    html = render_to_string(f'emails/{template}.html', context)
-    message = EmailMultiAlternatives(subject, text, settings.DEFAULT_FROM_EMAIL, [to_email])
-    message.attach_alternative(html, 'text/html')
-    message.send()
 
 
 def send_invoice(payment, customer_name, customer_email, detail=None):
@@ -46,7 +37,7 @@ def send_invoice(payment, customer_name, customer_email, detail=None):
     invoice_number = f"FAC-{payment.id:08d}"
     context = {
         'payment': payment,
-        'items': payment.items.all(),
+        'items': list(payment.items.all()),
         'invoice_number': invoice_number,
         'issued_at': timezone.localtime(issued_at),
         'customer_name': customer_name,
@@ -54,15 +45,10 @@ def send_invoice(payment, customer_name, customer_email, detail=None):
         'payment_detail': detail or payment_detail(payment),
         'is_delivery': payment.fulfillment == DELIVERY,
         'tax_percent': int(iva_rate() * 100),
-        'business': {
-            'name': 'Cafetería Irazú',
-            'address': 'Camino al Volcán Irazú, Cartago, Costa Rica',
-            'phone': '6353-1551',
-            'email': settings.CAFE_EMAIL,
-        },
     }
     try:
-        _send(f'Factura {invoice_number} - Cafetería Irazú', 'invoice', context, customer_email)
+        send_branded(f'Factura {invoice_number} - Cafetería Irazú', 'invoice', context,
+                     [customer_email], reference=f"la factura {invoice_number}")
     except Exception:
         # No se registra el correo del cliente en los logs
         logger.exception("No se pudo enviar la factura del pedido %s", payment.transaction_id)
@@ -92,15 +78,10 @@ def reject_sinpe(payment):
     payment.status = 'failed'
     payment.order_status = payment.CANCELLED
     if email:
-        context = {
-            'payment': payment,
-            'customer_name': payment.contact_name,
-            'cafe_phone': '6353-1551',
-            'cafe_email': settings.CAFE_EMAIL,
-        }
         try:
-            _send(f'No pudimos verificar tu pago - {payment.transaction_id}',
-                  'sinpe_rejected', context, email)
+            send_branded(f'No pudimos verificar tu pago - {payment.transaction_id}', 'sinpe_rejected',
+                         {'payment': payment, 'customer_name': payment.contact_name}, [email],
+                         reference=f"el pedido {payment.transaction_id}")
         except Exception:
             logger.exception("No se pudo avisar el rechazo del pedido %s", payment.transaction_id)
     payment.forget_contact()

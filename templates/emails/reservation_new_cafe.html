@@ -1,0 +1,15 @@
+{% extends 'emails/base.html' %}
+{% block title %}Nueva reserva{% endblock %}
+{% block preheader %}{{ reservation.customer_name }} · {{ fecha }} {{ hora }} · {{ reservation.guests }} personas{% endblock %}
+{% block hero_icon %}🔔{% endblock %}
+{% block hero_title %}Nueva reserva{% endblock %}
+{% block hero_subtitle %}Pendiente de confirmar{% endblock %}
+{% block content %}
+{% include 'emails/_reservation_box.html' %}
+{% include 'emails/_details.html' %}
+{% endblock %}
+{% block contact %}
+<tr><td style="padding:8px 32px 28px;" align="center">
+    <a href="{{ cafe.site_url }}/panel/reservas/?ver=pendientes" style="display:inline-block;background:#1a0f00;color:#f5e6d3;text-decoration:none;font-size:15px;font-weight:bold;padding:12px 24px;border-radius:8px;">Confirmar en el panel</a>
+</td></tr>
+{% endblock %}

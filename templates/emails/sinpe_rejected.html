@@ -1,18 +1,18 @@
-<!doctype html>
-<html lang="es">
-<head><meta charset="utf-8"><title>No pudimos verificar tu pago</title></head>
-<body style="margin:0;padding:24px 12px;background:#f5ede3;font-family:Arial,Helvetica,sans-serif;color:#2c1a0e;">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:12px;">
-    <tr><td style="background:#2c1a0e;padding:20px 28px;color:#fdf6ee;font-size:20px;font-weight:bold;">☕ Cafetería Irazú</td></tr>
-    <tr><td style="padding:24px 28px;font-size:15px;line-height:1.6;">
-        <p style="margin-top:0;">Hola {{ customer_name }},</p>
-        <p>No pudimos verificar el <strong>SINPE Móvil</strong> de tu pedido
-            <span style="font-family:monospace;">{{ payment.transaction_id }}</span>
-            (comprobante <strong>{{ payment.reference }}</strong>, monto <strong>₡{{ payment.amount|floatformat:0 }}</strong>).</p>
-        <p>Por eso el pedido quedó <strong>cancelado</strong> y no se va a preparar.</p>
-        <p>Si ya hiciste la transferencia, contáctanos con tu comprobante y lo revisamos:<br>
-            Teléfono: {{ cafe_phone }}<br>Correo: {{ cafe_email }}</p>
-    </td></tr>
+{% extends 'emails/base.html' %}
+{% block title %}No pudimos verificar tu pago{% endblock %}
+{% block preheader %}Tu pedido {{ payment.transaction_id }} quedó cancelado. Si ya pagaste, contáctanos.{% endblock %}
+{% block hero_icon %}⚠️{% endblock %}
+{% block hero_title %}No pudimos verificar tu pago{% endblock %}
+{% block hero_subtitle %}Pedido {{ payment.transaction_id }}{% endblock %}
+
+{% block content %}
+<p style="margin:0 0 12px;">Hola <strong>{{ customer_name }}</strong>,</p>
+<p style="margin:0 0 16px;">No encontramos el <strong>SINPE Móvil</strong> de tu pedido, por lo que quedó <strong>cancelado</strong> y no se va a preparar.</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;background:#fdf6ee;border-radius:12px;margin:0 0 16px;">
+    <tr><td style="padding:14px 16px 6px;color:#6b3a1f;width:42%;">Comprobante</td><td style="padding:14px 16px 6px;"><strong>{{ payment.reference }}</strong></td></tr>
+    <tr><td style="padding:6px 16px 14px;color:#6b3a1f;">Monto</td><td style="padding:6px 16px 14px;"><strong>₡{{ payment.amount|floatformat:0 }}</strong></td></tr>
 </table>
-</body>
-</html>
+{% endblock %}
+
+{% block contact_title %}¿Ya hiciste la transferencia?{% endblock %}
+{% block contact_text %}Contáctanos con tu comprobante y lo revisamos de inmediato. Indícanos el pedido <strong>{{ payment.transaction_id }}</strong>.{% endblock %}

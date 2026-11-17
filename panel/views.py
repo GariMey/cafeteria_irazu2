@@ -5,10 +5,8 @@ Solo pueden entrar usuarios con is_staff (personal de la cafetería).
 import logging
 from datetime import datetime, timedelta
 
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
-from django.core.mail import EmailMessage
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -18,6 +16,7 @@ from django.views.decorators.http import require_POST
 
 from bookings.models import Reservation, Table
 from bookings.notifications import send_cancelled, send_confirmed
+from cafeteria.emails import send_branded
 from cafeteria.models import Category, ContactMessage, ExperienceFeature, GalleryImage, Product
 from payments.invoices import confirm_sinpe, reject_sinpe
 from payments.models import Payment
@@ -369,20 +368,15 @@ def message_detail(request, pk):
     if request.method == 'POST' and form.is_valid():
         body = form.cleaned_data['body']
         quoted = "\n".join(f"> {line}" for line in message.message.splitlines())
-        email = EmailMessage(
-            subject=form.cleaned_data['subject'],
-            body=(f"{body}\n\n"
-                  f"--- Tu mensaje del {timezone.localtime(message.created_at):%d/%m/%Y %H:%M} ---\n{quoted}"),
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            to=[message.email],
-            # Si el cliente contesta, la respuesta llega al correo de la cafetería
-            reply_to=[settings.CAFE_EMAIL],
-        )
         try:
-            email.send()
+            # Si el cliente contesta, la respuesta llega al correo de la cafetería (reply_to)
+            send_branded(form.cleaned_data['subject'], 'message_reply', {
+                'subject': form.cleaned_data['subject'], 'body': body, 'quoted': quoted,
+                'original': message.message, 'original_date': timezone.localtime(message.created_at),
+            }, [message.email])
         except Exception:
             logger.exception("No se pudo enviar la respuesta al mensaje %s", message.pk)
-            messages.error(request, "No se pudo enviar el correo. Revisa la configuración de Gmail.")
+            messages.error(request, "No se pudo enviar el correo. Revisa la configuración del correo.")
         else:
             message.reply = body
             message.replied_at = timezone.now()

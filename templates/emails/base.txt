@@ -1,0 +1,17 @@
+{% autoescape off %}☕ {{ cafe.name|upper }}
+{{ cafe.tagline }}
+==================================================
+
+{% block content %}{% endblock %}
+{% block contact %}--------------------------------------------------
+{% block contact_title %}¿NECESITAS CANCELAR O HACER UN CAMBIO?{% endblock %}
+{% block contact_text %}Escríbenos o llámanos lo antes posible{% if reference %} e indícanos {{ reference }}{% endif %}.{% endblock %}
+
+   Teléfono / WhatsApp: {{ cafe.phone }}
+   WhatsApp directo:    {{ cafe.whatsapp_short }}
+   Correo:              {{ cafe.email }}
+--------------------------------------------------
+{% endblock %}
+{{ cafe.name }} · {{ cafe.address }}
+{{ cafe.site_url }}
+{% block footer_note %}{% endblock %}{% endautoescape %}

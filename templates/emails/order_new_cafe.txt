@@ -1,0 +1,17 @@
+{% extends 'emails/base.txt' %}
+{% block content %}NUEVO PEDIDO - {{ payment.get_fulfillment_display|upper }} - {{ payment.transaction_id }}
+{% if is_sinpe %}
+>>> ACCIÓN: verificar el SINPE con el comprobante {{ payment.reference }} y confirmarlo en el panel.
+{% endif %}
+{% for label, value in rows %}   {{ label }}: {{ value }}
+{% endfor %}{% if is_delivery %}
+ENTREGAR EN:
+   {{ delivery_address }}{% if delivery_notes %}
+   {{ delivery_notes }}{% endif %}
+{% endif %}
+PRODUCTOS
+{% include 'emails/_order_table.txt' %}
+{% endblock %}
+{% block contact %}Panel de pedidos: {{ cafe.site_url }}/panel/pedidos/
+Los datos del cliente se ven en el panel hasta entregar el pedido; luego se borran.
+{% endblock %}

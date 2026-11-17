@@ -1,0 +1,19 @@
+{% extends 'emails/base.txt' %}
+{% block content %}{% if is_sinpe %}¡RECIBIMOS TU PEDIDO!{% else %}¡PEDIDO CONFIRMADO!{% endif %} - {{ payment.transaction_id }}
+
+Hola {{ customer_name }},
+
+{% if is_sinpe %}Gracias por tu compra. Recibimos tu pedido. Lo confirmaremos en cuanto verifiquemos el SINPE Móvil con el comprobante que indicaste; en ese momento te enviaremos la factura a este correo.{% else %}Gracias por tu compra. Tu pedido fue confirmado. La factura te llega en un correo aparte.{% endif %}
+
+{% for label, value in rows %}   {{ label }}: {{ value }}
+{% endfor %}
+{% if is_delivery %}ENTREGA A DOMICILIO
+   {{ delivery_address }}{% if delivery_notes %}
+   {{ delivery_notes }}{% endif %}{% else %}RECOGER EN TIENDA
+   Te avisaremos cuando tu pedido esté listo.{% endif %}
+
+PRODUCTOS
+{% include 'emails/_order_table.txt' %}
+{% endblock %}
+{% block footer_note %}Tus datos de contacto se borran al entregar tu pedido; nunca guardamos los de tu tarjeta.
+{% endblock %}

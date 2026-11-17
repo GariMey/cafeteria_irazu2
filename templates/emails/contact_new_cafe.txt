@@ -1,0 +1,8 @@
+{% extends 'emails/base.txt' %}
+{% block content %}NUEVO MENSAJE DE CONTACTO
+{% for label, value in rows %}   {{ label }}: {{ value }}
+{% endfor %}
+{{ msg.message }}
+{% endblock %}
+{% block contact %}Responder desde el panel: {{ cafe.site_url }}/panel/mensajes/{{ msg.pk }}/
+{% endblock %}

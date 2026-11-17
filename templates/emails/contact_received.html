@@ -1,0 +1,13 @@
+{% extends 'emails/base.html' %}
+{% block title %}Recibimos tu mensaje{% endblock %}
+{% block preheader %}Te responderemos en menos de 24 horas.{% endblock %}
+{% block hero_icon %}✉️{% endblock %}
+{% block hero_title %}¡Recibimos tu mensaje!{% endblock %}
+{% block hero_subtitle %}Te responderemos en menos de 24 horas{% endblock %}
+{% block content %}
+<p style="margin:0 0 12px;">Hola <strong>{{ msg.name }}</strong>,</p>
+<p style="margin:0 0 16px;">Gracias por escribirnos. Ya tenemos tu mensaje y te responderemos a este correo lo antes posible.</p>
+<div style="border-left:3px solid #c4956a;background:#fdf6ee;border-radius:0 8px 8px 0;padding:10px 14px;font-size:14px;color:#3d1f00;margin-bottom:8px;">{{ msg.message|linebreaksbr }}</div>
+{% endblock %}
+{% block contact_title %}¿Es urgente?{% endblock %}
+{% block contact_text %}Llámanos o escríbenos por WhatsApp y te atendemos de inmediato.{% endblock %}

@@ -1,13 +1,12 @@
-{% autoescape off %}Hola {{ customer_name }},
+{% extends 'emails/base.txt' %}
+{% block content %}NO PUDIMOS VERIFICAR TU PAGO - {{ payment.transaction_id }}
 
-No pudimos verificar el SINPE Móvil de tu pedido {{ payment.transaction_id }}
-(comprobante {{ payment.reference }}, monto ₡{{ payment.amount|floatformat:0 }}).
+Hola {{ customer_name }},
 
-Por eso el pedido quedó cancelado y no se va a preparar.
+No encontramos el SINPE Móvil de tu pedido, por lo que quedó cancelado y no se va a preparar.
 
-Si ya hiciste la transferencia, contáctanos con tu comprobante y lo revisamos:
-   Teléfono: {{ cafe_phone }}
-   Correo:   {{ cafe_email }}
-
-Cafetería Irazú - Cartago, Costa Rica
-{% endautoescape %}
+   Comprobante: {{ payment.reference }}
+   Monto:       ₡{{ payment.amount|floatformat:0 }}
+{% endblock %}
+{% block contact_title %}¿YA HICISTE LA TRANSFERENCIA?{% endblock %}
+{% block contact_text %}Contáctanos con tu comprobante y lo revisamos de inmediato. Indícanos el pedido {{ payment.transaction_id }}.{% endblock %}

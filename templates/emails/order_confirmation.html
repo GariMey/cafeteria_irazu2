@@ -1,0 +1,31 @@
+{% extends 'emails/base.html' %}
+{% block title %}Pedido {{ payment.transaction_id }}{% endblock %}
+{% block preheader %}{% if is_sinpe %}Recibimos tu pedido; lo confirmaremos al verificar tu SINPE.{% else %}Tu pedido está confirmado. Total ₡{{ payment.amount|floatformat:0 }}.{% endif %}{% endblock %}
+{% block hero_icon %}{% if is_sinpe %}📱{% else %}🎉{% endif %}{% endblock %}
+{% block hero_title %}{% if is_sinpe %}¡Recibimos tu pedido!{% else %}¡Pedido confirmado!{% endif %}{% endblock %}
+{% block hero_subtitle %}Pedido {{ payment.transaction_id }}{% endblock %}
+
+{% block content %}
+<p style="margin:0 0 12px;">Hola <strong>{{ customer_name }}</strong>,</p>
+{% if is_sinpe %}
+<p style="margin:0 0 16px;">Gracias por tu compra. Estamos verificando tu <strong>SINPE Móvil</strong> con el comprobante que indicaste; en cuanto lo veamos reflejado te enviaremos la factura a este correo.</p>
+{% else %}
+<p style="margin:0 0 16px;">Gracias por tu compra. Ya estamos preparando tu pedido y la <strong>factura</strong> te llega en un correo aparte.</p>
+{% endif %}
+
+{% include 'emails/_details.html' %}
+
+{% if is_delivery %}
+<div style="background:#fdf6ee;border-left:4px solid #2d4a2d;border-radius:8px;padding:12px 16px;margin:0 0 16px;font-size:14px;">
+    <strong style="color:#2d4a2d;">🛵 Entrega a domicilio</strong><br>{{ delivery_address }}{% if delivery_notes %}<br><span style="color:#6b3a1f;">{{ delivery_notes }}</span>{% endif %}
+</div>
+{% else %}
+<div style="background:#fdf6ee;border-left:4px solid #2d4a2d;border-radius:8px;padding:12px 16px;margin:0 0 16px;font-size:14px;">
+    <strong style="color:#2d4a2d;">🏪 Recoger en tienda</strong><br>Te avisaremos cuando tu pedido esté listo. {{ cafe.address }}.
+</div>
+{% endif %}
+
+{% include 'emails/_order_table.html' %}
+{% endblock %}
+
+{% block footer_note %}<br><span style="color:#c4a888;">Tus datos de contacto se borran al entregar tu pedido; nunca guardamos los de tu tarjeta.</span>{% endblock %}

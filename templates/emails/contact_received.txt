@@ -1,0 +1,12 @@
+{% extends 'emails/base.txt' %}
+{% block content %}¡RECIBIMOS TU MENSAJE!
+
+Hola {{ msg.name }},
+
+Gracias por escribirnos. Te responderemos a este correo en menos de 24 horas.
+
+Tu mensaje:
+"{{ msg.message }}"
+{% endblock %}
+{% block contact_title %}¿ES URGENTE?{% endblock %}
+{% block contact_text %}Llámanos o escríbenos por WhatsApp y te atendemos de inmediato.{% endblock %}
