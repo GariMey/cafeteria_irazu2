@@ -295,3 +295,91 @@ class ExperiencePanelTests(PanelTestCase):
         self.assertEqual(feature.image_url, '')
         self.client.post(reverse('panel:experience_delete', args=[feature.pk]))
         self.assertFalse(ExperienceFeature.objects.filter(title='WiFi gratis').exists())
+
+
+# ── Reservas ───────────────────────────────────────────────────────────────
+from datetime import date, time
+
+from bookings.models import Reservation, Table
+
+
+class ReservationPanelTests(PanelTestCase):
+    def setUp(self):
+        super().setUp()
+        self.today = timezone.localdate()
+        self.res = Reservation.objects.create(
+            customer_name='Ana Mora', customer_email='ana@example.com', customer_phone='8888-8888',
+            date=self.today + timedelta(days=1), time=time(18, 0), guests=4,
+            special_requests='Mesa en la terraza')
+        self.table = Table.objects.get(number=1)   # creada por la migración 0003
+
+    def _act(self, **data):
+        return self.client.post(reverse('panel:reservation_action', args=[self.res.pk]), data)
+
+    def test_migration_created_tables(self):
+        self.assertEqual(Table.objects.count(), 14)
+
+    def test_upcoming_list_shows_reservation_and_counter(self):
+        response = self.client.get(reverse('panel:reservations'))
+        self.assertContains(response, 'Ana Mora')
+        self.assertContains(response, 'Mesa en la terraza')
+        self.assertEqual(response.context['counters']['pending_reservations'], 1)
+
+    def test_confirm_sends_email(self):
+        self._act(action='confirm')
+        self.res.refresh_from_db()
+        self.assertEqual(self.res.status, 'confirmed')
+        self.assertEqual(mail.outbox[0].to, ['ana@example.com'])
+        self.assertIn('confirmada', mail.outbox[0].subject)
+
+    def test_complete_only_after_confirm(self):
+        self._act(action='complete')
+        self.res.refresh_from_db()
+        self.assertEqual(self.res.status, 'pending')
+        self._act(action='confirm')
+        self._act(action='complete')
+        self.res.refresh_from_db()
+        self.assertEqual(self.res.status, 'completed')
+
+    def test_cancel_with_and_without_notice(self):
+        self._act(action='cancel', notify='0')
+        self.res.refresh_from_db()
+        self.assertEqual(self.res.status, 'cancelled')
+        self.assertEqual(len(mail.outbox), 0)
+
+        other = Reservation.objects.create(customer_name='Luis', customer_email='luis@example.com',
+                                           customer_phone='7777-7777', date=self.res.date,
+                                           time=time(12, 0), guests=2)
+        self.client.post(reverse('panel:reservation_action', args=[other.pk]),
+                         {'action': 'cancel', 'notify': '1'})
+        self.assertEqual(mail.outbox[0].to, ['luis@example.com'])
+
+    def test_assign_table_and_detect_conflict(self):
+        self._act(action='table', table=self.table.pk)
+        self.res.refresh_from_db()
+        self.assertEqual(self.res.table, self.table)
+
+        clash = Reservation.objects.create(customer_name='Otro', customer_email='o@example.com',
+                                           customer_phone='6666-6666', date=self.res.date,
+                                           time=time(19, 0), guests=2)
+        response = self.client.post(reverse('panel:reservation_action', args=[clash.pk]),
+                                    {'action': 'table', 'table': self.table.pk}, follow=True)
+        clash.refresh_from_db()
+        self.assertIsNone(clash.table)
+        self.assertContains(response, 'ya está reservada')
+
+    def test_small_table_warns(self):
+        self.res.guests = 8
+        self.res.save()
+        response = self._act(action='table', table=self.table.pk)
+        self.res.refresh_from_db()
+        self.assertEqual(self.res.table, self.table)
+        response = self.client.get(reverse('panel:reservations'))
+        self.assertContains(response, 'Mesa 1')
+
+    def test_today_filter(self):
+        Reservation.objects.create(customer_name='Hoy Persona', customer_email='h@example.com',
+                                   customer_phone='8888-0000', date=self.today, time=time(9, 0), guests=2)
+        response = self.client.get(reverse('panel:reservations') + '?ver=hoy')
+        self.assertContains(response, 'Hoy Persona')
+        self.assertNotContains(response, 'Ana Mora')

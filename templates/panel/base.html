@@ -33,6 +33,7 @@
             <nav aria-label="Secciones del panel"
                  class="order-last w-full lg:order-none lg:w-auto lg:flex-1 flex gap-1.5 overflow-x-auto lg:justify-center pb-1 lg:pb-0">
                 {% url 'panel:orders' as u %}{% include 'panel/_nav_item.html' with url=u key='orders' label='Pedidos' badge=counters.new_orders %}
+                {% url 'panel:reservations' as u %}{% include 'panel/_nav_item.html' with url=u key='reservations' label='Reservas' badge=counters.pending_reservations %}
                 {% url 'panel:products' as u %}{% include 'panel/_nav_item.html' with url=u key='products' label='Productos' badge=0 %}
                 {% url 'panel:gallery' as u %}{% include 'panel/_nav_item.html' with url=u key='gallery' label='Galería' badge=0 %}
                 {% url 'panel:experience' as u %}{% include 'panel/_nav_item.html' with url=u key='experience' label='Experiencia' badge=0 %}

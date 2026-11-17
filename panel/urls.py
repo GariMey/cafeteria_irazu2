@@ -16,6 +16,9 @@ urlpatterns = [
     path('pedidos/', views.orders, name='orders'),
     path('pedidos/<int:pk>/accion/', views.order_action, name='order_action'),
 
+    path('reservas/', views.reservations, name='reservations'),
+    path('reservas/<int:pk>/accion/', views.reservation_action, name='reservation_action'),
+
     path('productos/', views.products, name='products'),
     path('productos/nuevo/', views.product_form, name='product_new'),
     path('productos/<int:pk>/', views.product_form, name='product_edit'),

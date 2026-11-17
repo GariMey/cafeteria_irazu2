@@ -3,6 +3,7 @@
 Solo pueden entrar usuarios con is_staff (personal de la cafetería).
 """
 import logging
+from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.contrib import messages
@@ -10,10 +11,13 @@ from django.contrib.auth.decorators import user_passes_test
 from django.core.mail import EmailMessage
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
+from bookings.models import Reservation, Table
+from bookings.notifications import send_cancelled, send_confirmed
 from cafeteria.models import Category, ContactMessage, ExperienceFeature, GalleryImage, Product
 from payments.invoices import confirm_sinpe, reject_sinpe
 from payments.models import Payment
@@ -36,6 +40,8 @@ def _counters():
         'pending_sinpe': Payment.objects.filter(payment_method='sinpe', status='pending',
                                                 order_status__in=Payment.ACTIVE_ORDER_STATUSES).count(),
         'unread_messages': ContactMessage.objects.filter(read=False).count(),
+        'pending_reservations': Reservation.objects.filter(status='pending',
+                                                           date__gte=timezone.localdate()).count(),
     }
 
 
@@ -91,6 +97,107 @@ def order_action(request, pk):
     except OrderError as error:
         messages.error(request, str(error))
     return redirect('panel:orders')
+
+
+# ── Reservas ───────────────────────────────────────────────────────────────
+RESERVATION_FILTERS = [
+    ('proximas', 'Próximas'),
+    ('hoy', 'Hoy'),
+    ('pendientes', 'Por confirmar'),
+    ('pasadas', 'Pasadas'),
+    ('canceladas', 'Canceladas'),
+    ('todas', 'Todas'),
+]
+# Una mesa se considera ocupada 2 horas alrededor de la hora de la reserva
+TABLE_SLOT = timedelta(hours=2)
+
+
+def _table_conflict(reservation, table):
+    """Otra reserva activa en la misma mesa, el mismo día y a menos de 2 horas."""
+    start = datetime.combine(reservation.date, reservation.time)
+    others = (Reservation.objects.filter(table=table, date=reservation.date,
+                                         status__in=['pending', 'confirmed'])
+              .exclude(pk=reservation.pk))
+    for other in others:
+        if abs(datetime.combine(other.date, other.time) - start) < TABLE_SLOT:
+            return other
+    return None
+
+
+@staff_required
+def reservations(request):
+    show = request.GET.get('ver', 'proximas')
+    today = timezone.localdate()
+    qs = Reservation.objects.select_related('table')
+    active = ['pending', 'confirmed']
+    if show == 'hoy':
+        qs = qs.filter(date=today).exclude(status='cancelled').order_by('time')
+    elif show == 'pendientes':
+        qs = qs.filter(status='pending', date__gte=today).order_by('date', 'time')
+    elif show == 'pasadas':
+        qs = qs.filter(date__lt=today).exclude(status='cancelled').order_by('-date', '-time')
+    elif show == 'canceladas':
+        qs = qs.filter(status='cancelled').order_by('-date', '-time')
+    elif show == 'todas':
+        qs = qs.order_by('-date', '-time')
+    else:
+        show = 'proximas'
+        qs = qs.filter(date__gte=today, status__in=active).order_by('date', 'time')
+
+    today_qs = Reservation.objects.filter(date=today, status__in=active)
+    return _render(request, 'panel/reservations.html', {
+        'reservations': qs[:200],
+        'show': show,
+        'filters': RESERVATION_FILTERS,
+        'tables': Table.objects.filter(is_active=True),
+        'today': today,
+        'today_count': today_qs.count(),
+        'today_guests': sum(today_qs.values_list('guests', flat=True)),
+    }, 'reservations')
+
+
+@staff_required
+@require_POST
+def reservation_action(request, pk):
+    reservation = get_object_or_404(Reservation.objects.select_related('table'), pk=pk)
+    action = request.POST.get('action')
+    back = request.POST.get('ver', 'proximas')
+    redirect_to = f"{reverse('panel:reservations')}?ver={back if back in dict(RESERVATION_FILTERS) else 'proximas'}"
+
+    if action == 'table':
+        table_id = request.POST.get('table')
+        table = Table.objects.filter(pk=table_id, is_active=True).first() if table_id else None
+        if table and (conflict := _table_conflict(reservation, table)):
+            messages.warning(request, f"La mesa {table.number} ya está reservada a las "
+                                      f"{conflict.time:%H:%M} ese día ({conflict.customer_name}). Elige otra.")
+            return redirect(redirect_to)
+        reservation.table = table
+        reservation.save(update_fields=['table'])
+        if table and table.capacity < reservation.guests:
+            messages.warning(request, f"Mesa {table.number} asignada, pero es para {table.capacity} "
+                                      f"y la reserva es de {reservation.guests} personas.")
+        else:
+            messages.success(request, f"Mesa {'asignada: ' + str(table.number) if table else 'quitada'}.")
+    elif action == 'confirm' and reservation.status == 'pending':
+        reservation.status = 'confirmed'
+        reservation.save(update_fields=['status'])
+        sent = send_confirmed(reservation)
+        messages.success(request, f"Reserva de {reservation.customer_name} confirmada. "
+                                  + ("Se le avisó por correo." if sent else "No se pudo enviar el correo."))
+    elif action == 'complete' and reservation.status == 'confirmed':
+        reservation.status = 'completed'
+        reservation.save(update_fields=['status'])
+        messages.success(request, f"Reserva de {reservation.customer_name} marcada como completada.")
+    elif action == 'cancel' and reservation.status in ('pending', 'confirmed'):
+        reservation.status = 'cancelled'
+        reservation.save(update_fields=['status'])
+        sent = send_cancelled(reservation) if request.POST.get('notify') == '1' else None
+        messages.success(request, f"Reserva de {reservation.customer_name} cancelada."
+                                  + {True: " Se le avisó por correo.", False: " No se pudo enviar el correo.",
+                                     None: ""}[sent])
+    else:
+        messages.error(request, "Acción no válida para esta reserva.")
+    return redirect(redirect_to)
 
 
 # ── Productos ──────────────────────────────────────────────────────────────

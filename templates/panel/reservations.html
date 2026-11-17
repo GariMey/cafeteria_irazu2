@@ -1,0 +1,105 @@
+{% extends 'panel/base.html' %}
+
+{% block title %}Reservas{% endblock %}
+
+{% block content %}
+<div class="flex flex-wrap items-end justify-between gap-3 mb-4">
+    <div>
+        <h1 class="font-display text-3xl">Reservas</h1>
+        <p class="text-sm text-espresso/60">
+            Hoy: <strong>{{ today_count }}</strong> reserva{{ today_count|pluralize }} · <strong>{{ today_guests }}</strong> persona{{ today_guests|pluralize }}
+            {% if counters.pending_reservations %} · <strong class="text-yellow-800">{{ counters.pending_reservations }} por confirmar</strong>{% endif %}
+        </p>
+    </div>
+    <nav class="flex flex-wrap gap-1 text-sm bg-white rounded-lg p-1 shadow-sm">
+        {% for key, label in filters %}
+        <a href="?ver={{ key }}" class="px-3 py-1.5 rounded-md {% if show == key %}bg-espresso text-crema{% else %}hover:bg-crema{% endif %}">{{ label }}</a>
+        {% endfor %}
+    </nav>
+</div>
+
+{% regroup reservations by date as days %}
+{% for day in days %}
+<section class="mb-5">
+    <h2 class="font-display text-xl mb-2 flex items-center gap-2">
+        {% if day.grouper == today %}<span class="rounded-full bg-latte text-espresso text-xs font-body font-semibold px-2 py-0.5">HOY</span>{% endif %}
+        {{ day.grouper|date:"l j \d\e F" }}
+        <span class="text-sm font-body text-espresso/50">· {{ day.list|length }} reserva{{ day.list|length|pluralize }}</span>
+    </h2>
+
+    <div class="bg-white rounded-2xl shadow-sm divide-y divide-crema">
+        {% for r in day.list %}
+        <div class="p-3 grid gap-3 lg:grid-cols-[6rem_1fr_auto] lg:items-center
+                    {% if r.status == 'pending' %}border-l-4 border-yellow-400{% elif r.status == 'confirmed' %}border-l-4 border-verdeClaro{% else %}border-l-4 border-transparent opacity-70{% endif %}">
+            <!-- Hora y personas -->
+            <div class="flex lg:flex-col items-baseline lg:items-start gap-2 lg:gap-0">
+                <div class="font-display text-2xl leading-none">{{ r.time|time:"g:i" }}<span class="text-sm">{{ r.time|time:"a" }}</span></div>
+                <div class="text-sm text-espresso/60">👥 {{ r.guests }} persona{{ r.guests|pluralize }}</div>
+            </div>
+
+            <!-- Cliente -->
+            <div class="text-sm min-w-0">
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="font-semibold text-base">{{ r.customer_name }}</span>
+                    <span class="rounded-full px-2 py-0.5 text-xs font-semibold
+                        {% if r.status == 'pending' %}bg-yellow-100 text-yellow-900{% elif r.status == 'confirmed' %}bg-green-100 text-green-800{% elif r.status == 'completed' %}bg-gray-100 text-gray-700{% else %}bg-red-100 text-red-800{% endif %}">
+                        {{ r.get_status_display }}</span>
+                    {% if r.table %}<span class="rounded-full bg-crema px-2 py-0.5 text-xs">Mesa {{ r.table.number }}</span>{% endif %}
+                </div>
+                <div class="text-espresso/70 mt-0.5">
+                    📞 <a class="underline" href="tel:{{ r.customer_phone }}">{{ r.customer_phone }}</a>
+                    · <a class="underline" target="_blank" rel="noopener" href="https://wa.me/506{{ r.customer_phone|cut:'-'|cut:' ' }}">WhatsApp</a>
+                    · ✉️ <a class="underline" href="mailto:{{ r.customer_email }}">{{ r.customer_email }}</a>
+                </div>
+                {% if r.special_requests %}<div class="mt-1 rounded-lg bg-beige px-2 py-1 text-espresso/80">📝 {{ r.special_requests }}</div>{% endif %}
+            </div>
+
+            <!-- Acciones -->
+            <div class="flex flex-wrap items-center gap-2">
+                {% if r.status == 'pending' or r.status == 'confirmed' %}
+                <form method="post" action="{% url 'panel:reservation_action' r.pk %}" class="flex items-center gap-1">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="table"><input type="hidden" name="ver" value="{{ show }}">
+                    <select name="table" onchange="this.form.submit()" aria-label="Mesa"
+                            class="rounded-lg border border-latte/40 bg-white px-2 py-1.5 text-sm">
+                        <option value="">Sin mesa</option>
+                        {% for t in tables %}
+                        <option value="{{ t.pk }}" {% if r.table_id == t.pk %}selected{% endif %}>
+                            Mesa {{ t.number }} ({{ t.capacity }}){% if t.capacity < r.guests %} ⚠{% endif %}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <noscript><button class="text-sm underline">Asignar</button></noscript>
+                </form>
+                {% endif %}
+
+                {% if r.status == 'pending' %}
+                <form method="post" action="{% url 'panel:reservation_action' r.pk %}">{% csrf_token %}
+                    <input type="hidden" name="action" value="confirm"><input type="hidden" name="ver" value="{{ show }}">
+                    <button class="rounded-lg bg-green-600 text-white px-3 py-1.5 text-sm font-semibold hover:bg-green-700" title="Confirma y avisa al cliente por correo">✅ Confirmar</button>
+                </form>
+                {% elif r.status == 'confirmed' %}
+                <form method="post" action="{% url 'panel:reservation_action' r.pk %}">{% csrf_token %}
+                    <input type="hidden" name="action" value="complete"><input type="hidden" name="ver" value="{{ show }}">
+                    <button class="rounded-lg bg-espresso text-crema px-3 py-1.5 text-sm font-semibold hover:bg-cafe" title="El cliente ya vino">✔️ Completar</button>
+                </form>
+                {% endif %}
+
+                {% if r.status == 'pending' or r.status == 'confirmed' %}
+                <form method="post" action="{% url 'panel:reservation_action' r.pk %}"
+                      onsubmit="const ok = confirm('¿Cancelar la reserva de {{ r.customer_name|escapejs }}?'); if (ok) this.notify.value = confirm('¿Avisarle al cliente por correo?') ? '1' : '0'; return ok;">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="cancel"><input type="hidden" name="ver" value="{{ show }}">
+                    <input type="hidden" name="notify" value="1">
+                    <button class="rounded-lg border border-red-300 text-red-700 px-3 py-1.5 text-sm hover:bg-red-50">Cancelar</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% empty %}
+<div class="bg-white rounded-2xl p-8 text-center text-espresso/50">📅 No hay reservas en esta vista.</div>
+{% endfor %}
+{% endblock %}
