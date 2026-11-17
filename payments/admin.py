@@ -14,8 +14,8 @@ class PaymentItemInline(admin.TabularInline):
 
 @admin.register(Payment)
 class PaymentAdmin(admin.ModelAdmin):
-    list_display = ['transaction_id', 'fulfillment', 'amount_display', 'status_badge', 'payment_method', 'reference', 'invoice_number', 'created_at']
-    list_filter = ['status', 'fulfillment', 'payment_method', 'created_at']
+    list_display = ['transaction_id', 'order_status', 'fulfillment', 'amount_display', 'status_badge', 'payment_method', 'reference', 'invoice_number', 'created_at']
+    list_filter = ['order_status', 'status', 'fulfillment', 'payment_method', 'created_at']
     list_editable = []
     search_fields = ['transaction_id', 'reference', 'invoice_number']
     readonly_fields = ['transaction_id', 'created_at', 'fulfillment', 'payment_method', 'reference', 'subtotal', 'tax',
@@ -46,7 +46,7 @@ class PaymentAdmin(admin.ModelAdmin):
     fieldsets = (
         # Los datos personales del cliente no se guardan (ver Payment)
         ('Pedido', {
-            'fields': ('transaction_id', 'fulfillment', 'status', 'payment_method', 'reference')
+            'fields': ('transaction_id', 'order_status', 'fulfillment', 'status', 'payment_method', 'reference')
         }),
         ('Montos', {
             'fields': ('subtotal', 'delivery_fee', 'tax', 'amount_display')
@@ -62,6 +62,9 @@ class PaymentAdmin(admin.ModelAdmin):
     # ── Confirmación de SINPE ──────────────────────────────────────────────
     def save_model(self, request, obj, form, change):
         """Al cambiar el estado a mano, se envía la factura o el aviso de rechazo."""
+        # Pedido cerrado: los datos de contacto del cliente se borran
+        if 'order_status' in form.changed_data and obj.order_status in obj.FINAL_ORDER_STATUSES:
+            obj.forget_contact()
         super().save_model(request, obj, form, change)
         if not change or 'status' not in form.changed_data or obj.payment_method != 'sinpe':
             return

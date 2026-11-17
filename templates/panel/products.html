@@ -1,0 +1,74 @@
+{% extends 'panel/base.html' %}
+
+{% block title %}Productos{% endblock %}
+
+{% block content %}
+<div class="flex flex-wrap items-end justify-between gap-3 mb-4">
+    <div>
+        <h1 class="font-display text-3xl">Productos</h1>
+        <p class="text-sm text-espresso/60">{{ products|length }} producto{{ products|length|pluralize }}</p>
+    </div>
+    <a href="{% url 'panel:product_new' %}" class="rounded-lg bg-espresso text-crema px-4 py-2 font-semibold hover:bg-cafe">+ Nuevo producto</a>
+</div>
+
+<form method="get" class="flex flex-wrap gap-2 mb-4">
+    <input type="search" name="q" value="{{ query }}" placeholder="Buscar producto…"
+           class="flex-1 min-w-[12rem] rounded-lg border border-latte/40 bg-white px-3 py-2">
+    <select name="categoria" class="rounded-lg border border-latte/40 bg-white px-3 py-2" onchange="this.form.submit()">
+        <option value="">Todas las categorías</option>
+        {% for category in categories %}
+        <option value="{{ category.id }}" {% if selected_category == category.id|stringformat:'d' %}selected{% endif %}>{{ category.icon }} {{ category.name }}</option>
+        {% endfor %}
+    </select>
+    <button class="rounded-lg border border-latte/40 bg-white px-4 py-2">Buscar</button>
+</form>
+
+<div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+        <thead class="bg-crema text-left">
+            <tr>
+                <th class="px-3 py-2">Producto</th>
+                <th class="px-3 py-2">Categoría</th>
+                <th class="px-3 py-2 text-right">Precio</th>
+                <th class="px-3 py-2 text-center">Disponible</th>
+                <th class="px-3 py-2 text-center">Destacado</th>
+                <th class="px-3 py-2"></th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-crema">
+            {% for product in products %}
+            <tr class="{% if not product.available %}bg-gray-50 text-espresso/50{% endif %}">
+                <td class="px-3 py-2">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg overflow-hidden bg-crema flex-shrink-0 flex items-center justify-center">
+                            {% if product.image_url %}<img src="{{ product.image_url }}" alt="" class="w-full h-full object-cover">{% else %}{{ product.category.icon }}{% endif %}
+                        </div>
+                        <a href="{% url 'panel:product_edit' product.pk %}" class="font-semibold hover:underline">{{ product.name }}</a>
+                    </div>
+                </td>
+                <td class="px-3 py-2">{{ product.category.name }}</td>
+                <td class="px-3 py-2 text-right font-semibold">₡{{ product.price|floatformat:0 }}</td>
+                <td class="px-3 py-2 text-center">
+                    <form method="post" action="{% url 'panel:product_toggle' product.pk %}">{% csrf_token %}
+                        <input type="hidden" name="field" value="available"><input type="hidden" name="next" value="{{ request.get_full_path }}">
+                        <button class="rounded-full px-3 py-1 text-xs font-semibold {% if product.available %}bg-green-100 text-green-800{% else %}bg-gray-200 text-gray-600{% endif %}"
+                                title="Clic para cambiar">{% if product.available %}Sí{% else %}Agotado{% endif %}</button>
+                    </form>
+                </td>
+                <td class="px-3 py-2 text-center">
+                    <form method="post" action="{% url 'panel:product_toggle' product.pk %}">{% csrf_token %}
+                        <input type="hidden" name="field" value="featured"><input type="hidden" name="next" value="{{ request.get_full_path }}">
+                        <button class="text-xl" title="Clic para cambiar">{% if product.featured %}⭐{% else %}☆{% endif %}</button>
+                    </form>
+                </td>
+                <td class="px-3 py-2 text-right"><a href="{% url 'panel:product_edit' product.pk %}" class="text-mocha hover:underline">Editar</a></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="p-10 text-center text-espresso/50">No hay productos que coincidan.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+{% endblock %}

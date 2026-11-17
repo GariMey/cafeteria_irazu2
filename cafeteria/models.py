@@ -92,12 +92,41 @@ class GalleryImage(models.Model):
         return self.title or f"Imagen {self.pk}"
 
 
+class ExperienceFeature(models.Model):
+    """Tarjeta de la sección «La Experiencia Irazú» de la página de inicio."""
+    icon = models.CharField(max_length=10, blank=True, verbose_name="Ícono (emoji)")
+    title = models.CharField(max_length=80, verbose_name="Título")
+    description = models.TextField(max_length=300, verbose_name="Descripción")
+    image = models.ImageField(upload_to='experience/', blank=True, null=True, verbose_name="Imagen")
+    # Imagen incluida en el proyecto (static/img/...), usada si no se sube otra
+    static_image = models.CharField(max_length=200, blank=True, editable=False)
+    order = models.PositiveIntegerField(default=0, verbose_name="Orden")
+    active = models.BooleanField(default=True, verbose_name="Visible")
+
+    class Meta:
+        verbose_name = "Tarjeta de La Experiencia"
+        verbose_name_plural = "La Experiencia Irazú"
+        ordering = ['order', 'id']
+
+    def __str__(self):
+        return self.title
+
+    @property
+    def image_url(self):
+        if self.image:
+            return self.image.url
+        return static(self.static_image) if self.static_image else ''
+
+
 class ContactMessage(models.Model):
     name = models.CharField(max_length=100, verbose_name="Nombre")
     email = models.EmailField(verbose_name="Correo")
     phone = models.CharField(max_length=20, blank=True, verbose_name="Teléfono")
     message = models.TextField(verbose_name="Mensaje")
     read = models.BooleanField(default=False, verbose_name="Leído")
+    # Respuesta enviada desde el panel del negocio (llega al cliente por correo)
+    reply = models.TextField(blank=True, verbose_name="Respuesta")
+    replied_at = models.DateTimeField(null=True, blank=True, verbose_name="Respondido")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

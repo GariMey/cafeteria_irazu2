@@ -4,13 +4,14 @@ from django.contrib import messages
 from django.core.mail import send_mail
 from django.conf import settings
 from django.http import HttpResponseRedirect
-from .models import Category, Product, GalleryImage, Testimonial, ContactMessage
+from .models import Category, Product, GalleryImage, Testimonial, ContactMessage, ExperienceFeature
 from .forms import ContactForm, TestimonialForm
 
 def home(request):
     categories = Category.objects.prefetch_related('products').filter(products__isnull=False).distinct()
     featured_products = Product.objects.filter(featured=True, available=True).select_related('category')[:8]
     gallery_images = GalleryImage.objects.all()[:9]
+    experience_features = ExperienceFeature.objects.filter(active=True)
     testimonials = Testimonial.objects.filter(active=True)[:6]
     contact_form = ContactForm()
     testimonial_form = TestimonialForm()
@@ -94,6 +95,7 @@ El equipo de Cafeteria Irazu
         'categories': categories,
         'featured_products': featured_products,
         'gallery_images': gallery_images,
+        'experience_features': experience_features,
         'testimonials': testimonials,
         'contact_form': contact_form,
         'testimonial_form': testimonial_form,

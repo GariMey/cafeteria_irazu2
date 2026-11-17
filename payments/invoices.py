@@ -4,7 +4,8 @@
 - SINPE Móvil: la factura se envía cuando la cafetería confirma el depósito
   en el admin; si lo rechaza, se avisa al cliente.
 
-En ambos casos el nombre y correo temporales del pedido se borran después.
+Los datos de contacto del pedido se borran al entregarlo o cancelarlo
+(ver payments.orders), no al enviar la factura: el panel los necesita.
 """
 import logging
 
@@ -31,11 +32,6 @@ def _send(subject, template, context, to_email):
     message = EmailMultiAlternatives(subject, text, settings.DEFAULT_FROM_EMAIL, [to_email])
     message.attach_alternative(html, 'text/html')
     message.send()
-
-
-def _forget_contact(payment):
-    payment.pending_customer_name = ''
-    payment.pending_customer_email = ''
 
 
 def send_invoice(payment, customer_name, customer_email, detail=None):
@@ -74,9 +70,7 @@ def send_invoice(payment, customer_name, customer_email, detail=None):
 
     payment.invoice_number = invoice_number
     payment.invoiced_at = issued_at
-    _forget_contact(payment)
-    payment.save(update_fields=['invoice_number', 'invoiced_at',
-                                'pending_customer_name', 'pending_customer_email'])
+    payment.save(update_fields=['invoice_number', 'invoiced_at', 'updated_at'])
     return True
 
 
@@ -87,19 +81,20 @@ def confirm_sinpe(payment):
     """
     if payment.status != 'completed':
         payment.status = 'completed'
-        payment.save(update_fields=['status'])
-    return send_invoice(payment, payment.pending_customer_name, payment.pending_customer_email)
+        payment.save(update_fields=['status', 'updated_at'])
+    return send_invoice(payment, payment.contact_name, payment.contact_email)
 
 
 def reject_sinpe(payment):
-    """Marca un SINPE como fallido, avisa al cliente y borra su contacto."""
-    email = payment.pending_customer_email
-    if payment.status != 'failed':
-        payment.status = 'failed'
+    """Marca un SINPE como fallido, cancela el pedido, avisa al cliente y
+    borra su contacto."""
+    email = payment.contact_email
+    payment.status = 'failed'
+    payment.order_status = payment.CANCELLED
     if email:
         context = {
             'payment': payment,
-            'customer_name': payment.pending_customer_name,
+            'customer_name': payment.contact_name,
             'cafe_phone': '6353-1551',
             'cafe_email': settings.CAFE_EMAIL,
         }
@@ -108,5 +103,5 @@ def reject_sinpe(payment):
                   'sinpe_rejected', context, email)
         except Exception:
             logger.exception("No se pudo avisar el rechazo del pedido %s", payment.transaction_id)
-    _forget_contact(payment)
-    payment.save(update_fields=['status', 'pending_customer_name', 'pending_customer_email'])
+    payment.forget_contact()
+    payment.save()

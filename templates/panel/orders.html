@@ -1,0 +1,66 @@
+{% extends 'panel/base.html' %}
+
+{% block title %}Pedidos{% endblock %}
+
+{% block content %}
+<div class="flex flex-wrap items-end justify-between gap-3 mb-4">
+    <div>
+        <h1 class="font-display text-3xl">Pedidos</h1>
+        <p class="text-sm text-espresso/60">Se actualiza solo cada 20 segundos.
+            {% if counters.pending_sinpe %}<strong class="text-yellow-800">{{ counters.pending_sinpe }} SINPE por verificar.</strong>{% endif %}</p>
+    </div>
+    <span id="refresh-status" class="text-xs text-espresso/40"></span>
+</div>
+
+{% include 'panel/_orders_list.html' %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+    const baseTitle = document.title;
+    const status = document.getElementById('refresh-status');
+    let newest = Number(document.getElementById('orders-list').dataset.newest);
+
+    // Pitido corto cuando llega un pedido nuevo (sin archivos de audio)
+    function beep() {
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            osc.frequency.value = 880;
+            osc.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.25);
+        } catch (e) { /* el navegador puede bloquear el audio hasta que se interactúe */ }
+    }
+
+    async function refresh() {
+        // No recargar si el usuario está a punto de hacer clic en un botón
+        if (document.activeElement && document.activeElement.closest('#orders-list form')) return;
+        try {
+            const response = await fetch(location.pathname, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+            if (!response.ok) throw new Error(response.status);
+            if (response.redirected) { location.reload(); return; }   // sesión vencida
+            const html = await response.text();
+            const tmp = document.createElement('div');
+            tmp.innerHTML = html;
+            const fresh = tmp.querySelector('#orders-list');
+            if (!fresh) return;
+            const freshNewest = Number(fresh.dataset.newest);
+            const wasOpen = document.querySelector('#orders-list details')?.open;
+            document.getElementById('orders-list').replaceWith(fresh);
+            if (wasOpen) fresh.querySelector('details')?.setAttribute('open', '');
+
+            const newCount = Number(fresh.dataset.newCount);
+            document.title = newCount ? `(${newCount}) ${baseTitle}` : baseTitle;
+            if (freshNewest > newest) beep();
+            newest = Math.max(newest, freshNewest);
+            status.textContent = 'Actualizado ' + new Date().toLocaleTimeString('es-CR');
+        } catch (e) {
+            status.textContent = 'Sin conexión, reintentando…';
+        }
+    }
+    setInterval(refresh, 20000);
+})();
+</script>
+{% endblock %}

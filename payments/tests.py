@@ -168,11 +168,17 @@ class CheckoutViewTests(TestCase):
         self.assertEqual(
             {f.name for f in Payment._meta.fields},
             {'id', 'cart', 'fulfillment', 'subtotal', 'tax', 'delivery_fee', 'amount',
-             'status', 'payment_method', 'transaction_id', 'reference', 'created_at',
-             'invoice_number', 'invoiced_at', 'pending_customer_name', 'pending_customer_email'},
+             'status', 'payment_method', 'transaction_id', 'reference', 'created_at', 'updated_at',
+             'invoice_number', 'invoiced_at', 'order_status', 'contact_name', 'contact_email',
+             'contact_phone', 'delivery_address', 'delivery_notes'},
         )
-        # Con tarjeta no queda ningún dato de contacto guardado
-        self.assertEqual((payment.pending_customer_name, payment.pending_customer_email), ('', ''))
+        # El contacto se guarda mientras el pedido está activo (para prepararlo)…
+        self.assertEqual(payment.order_status, 'new')
+        self.assertEqual(payment.contact_phone, '8888-8888')
+        # …pero nunca se guarda nada de la tarjeta
+        for field in Payment._meta.fields:
+            if field.name != 'transaction_id':   # es aleatorio
+                self.assertNotIn('4111', str(getattr(payment, field.attname)))
         self.assertRegex(payment.transaction_id, r'^TXN-[0-9A-F]{10}$')
 
         self.cart.refresh_from_db()
@@ -266,7 +272,7 @@ class CheckoutViewTests(TestCase):
 
     def test_sinpe_keeps_contact_only_until_invoice(self):
         payment = self._sinpe_order()
-        self.assertEqual(payment.pending_customer_email, 'maria@example.com')
+        self.assertEqual(payment.contact_email, 'maria@example.com')
         self.assertEqual(payment.invoice_number, '')
 
         from .invoices import confirm_sinpe
@@ -274,7 +280,8 @@ class CheckoutViewTests(TestCase):
         payment.refresh_from_db()
         self.assertEqual(payment.status, 'completed')
         self.assertTrue(payment.invoice_number)
-        self.assertEqual((payment.pending_customer_name, payment.pending_customer_email), ('', ''))
+        # El contacto sigue hasta entregar el pedido (lo necesita el panel)
+        self.assertEqual(payment.contact_email, 'maria@example.com')
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].to, ['maria@example.com'])
         self.assertIn('comprobante 202611171234', mail.outbox[0].body)
@@ -289,7 +296,8 @@ class CheckoutViewTests(TestCase):
         reject_sinpe(payment)
         payment.refresh_from_db()
         self.assertEqual(payment.status, 'failed')
-        self.assertEqual(payment.pending_customer_email, '')
+        self.assertEqual(payment.contact_email, '')
+        self.assertEqual(payment.order_status, 'cancelled')
         self.assertEqual(mail.outbox[0].to, ['maria@example.com'])
         self.assertIn('No pudimos verificar', mail.outbox[0].subject)
 

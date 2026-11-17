@@ -385,60 +385,19 @@
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div class="experience-card group bg-white/10 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/20 hover:bg-white/15 transition-all duration-300 scroll-reveal">
+            {% for feature in experience_features %}
+            <div class="experience-card group bg-white/10 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/20 hover:bg-white/15 transition-all duration-300 scroll-reveal" style="animation-delay:{{ forloop.counter0 }}00ms">
+                {% if feature.image_url %}
                 <div class="aspect-[16/10] overflow-hidden bg-white/5">
-                    <img src="{% static 'img/Vista a las Montañas.jpg' %}" alt="Vista a las Montañas" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                    <img src="{{ feature.image_url }}" alt="{{ feature.title }}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                 </div>
+                {% endif %}
                 <div class="p-8">
-                    <h3 class="font-display text-xl text-crema mb-3 flex items-center gap-3"><span class="text-2xl">🏔️</span>Vista a las Montañas</h3>
-                    <p class="font-body text-sm text-crema/60 leading-relaxed">Disfruta de panorámicas únicas del volcán Irazú y las montañas de Cartago desde nuestra terraza.</p>
+                    <h3 class="font-display text-xl text-crema mb-3 flex items-center gap-3">{% if feature.icon %}<span class="text-2xl">{{ feature.icon }}</span>{% endif %}{{ feature.title }}</h3>
+                    <p class="font-body text-sm text-crema/60 leading-relaxed">{{ feature.description }}</p>
                 </div>
             </div>
-            <div class="experience-card group bg-white/10 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/20 hover:bg-white/15 transition-all duration-300 scroll-reveal" style="animation-delay:100ms">
-                <div class="aspect-[16/10] overflow-hidden bg-white/5">
-                    <img src="{% static 'img/Pet Friendly.jpg' %}" alt="Pet Friendly" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                </div>
-                <div class="p-8">
-                    <h3 class="font-display text-xl text-crema mb-3 flex items-center gap-3"><span class="text-2xl">🐾</span>Pet Friendly</h3>
-                    <p class="font-body text-sm text-crema/60 leading-relaxed">Tu mejor amigo también es bienvenido. Contamos con área especial para mascotas y agua fresca.</p>
-                </div>
-            </div>
-            <div class="experience-card group bg-white/10 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/20 hover:bg-white/15 transition-all duration-300 scroll-reveal" style="animation-delay:200ms">
-                <div class="aspect-[16/10] overflow-hidden bg-white/5">
-                    <img src="{% static 'img/Área Familiar.jpg' %}" alt="Área Familiar" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                </div>
-                <div class="p-8">
-                    <h3 class="font-display text-xl text-crema mb-3 flex items-center gap-3"><span class="text-2xl">👨‍👩‍👧</span>Área Familiar</h3>
-                    <p class="font-body text-sm text-crema/60 leading-relaxed">Zona especial para los más pequeños con juegos y actividades. El lugar ideal para toda la familia.</p>
-                </div>
-            </div>
-            <div class="experience-card group bg-white/10 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/20 hover:bg-white/15 transition-all duration-300 scroll-reveal" style="animation-delay:300ms">
-                <div class="aspect-[16/10] overflow-hidden bg-white/5">
-                    <img src="{% static 'img/Parking.jpg' %}" alt="Parqueo Amplio" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                </div>
-                <div class="p-8">
-                    <h3 class="font-display text-xl text-crema mb-3 flex items-center gap-3"><span class="text-2xl">🅿️</span>Parqueo Amplio</h3>
-                    <p class="font-body text-sm text-crema/60 leading-relaxed">Amplio estacionamiento gratuito para que llegues sin preocupaciones, ideal para grupos y familias.</p>
-                </div>
-            </div>
-            <div class="experience-card group bg-white/10 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/20 hover:bg-white/15 transition-all duration-300 scroll-reveal" style="animation-delay:400ms">
-                <div class="aspect-[16/10] overflow-hidden bg-white/5">
-                    <img src="{% static 'img/Música Agradable.jpg' %}" alt="Música Agradable" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                </div>
-                <div class="p-8">
-                    <h3 class="font-display text-xl text-crema mb-3 flex items-center gap-3"><span class="text-2xl">🎵</span>Música Agradable</h3>
-                    <p class="font-body text-sm text-crema/60 leading-relaxed">Ambiente musical cuidadosamente seleccionado para crear la atmósfera perfecta de relajación.</p>
-                </div>
-            </div>
-            <div class="experience-card group bg-white/10 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/20 hover:bg-white/15 transition-all duration-300 scroll-reveal" style="animation-delay:500ms">
-                <div class="aspect-[16/10] overflow-hidden bg-white/5">
-                    <img src="{% static 'img/Para llevar.png' %}" alt="Para Llevar" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                </div>
-                <div class="p-8">
-                    <h3 class="font-display text-xl text-crema mb-3 flex items-center gap-3"><span class="text-2xl">🥡</span>Para Llevar</h3>
-                    <p class="font-body text-sm text-crema/60 leading-relaxed">¿Tienes prisa? Todos nuestros productos también están disponibles para llevar. Mismo sabor, en tu camino.</p>
-                </div>
-            </div>
+            {% endfor %}
         </div>
     </div>
 </section>

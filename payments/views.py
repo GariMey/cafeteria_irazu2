@@ -48,8 +48,8 @@ def checkout(request):
     comprobante en el admin.
 
     Los datos personales y de tarjeta solo viven durante esta petición:
-    se usan para validar y para los correos, y no se guardan (salvo el
-    nombre y correo de un SINPE pendiente, hasta enviar su factura).
+    la tarjeta nunca se guarda; el contacto se guarda solo mientras el
+    pedido está activo y se borra al entregarlo o cancelarlo.
     """
     cart = _active_cart(request)
     if not cart or not cart.items.exists():
@@ -117,10 +117,13 @@ def _process_order(request, cart, form):
             status='pending' if method == SINPE else 'completed',
             payment_method=method,
             reference=form.cleaned_data.get('sinpe_reference', ''),
-            # Solo SINPE: la factura se envía después de verificar el depósito,
-            # así que el contacto se guarda hasta entonces (luego se borra).
-            pending_customer_name=form.cleaned_data['customer_name'] if method == SINPE else '',
-            pending_customer_email=form.cleaned_data['customer_email'] if method == SINPE else '',
+            # Contacto temporal para preparar/entregar el pedido y enviar la
+            # factura; se borra al entregarlo o cancelarlo (payments.orders).
+            contact_name=form.cleaned_data['customer_name'],
+            contact_email=form.cleaned_data['customer_email'],
+            contact_phone=form.cleaned_data['customer_phone'],
+            delivery_address=form.cleaned_data['delivery_address'],
+            delivery_notes=form.cleaned_data['delivery_notes'],
         )
         PaymentItem.objects.bulk_create([
             PaymentItem(payment=payment, product_name=item.product.name,
@@ -136,7 +139,7 @@ def _process_order(request, cart, form):
 def _send_confirmation_emails(payment, form):
     """Envía los correos al cliente y a la cafetería.
 
-    Es el único lugar donde se usan los datos personales; no se guardan.
+    Los datos de contacto vienen del formulario; nunca se registran en los logs.
     """
     data = form.cleaned_data
     metodo_pago = form.payment_summary
@@ -187,7 +190,7 @@ Fecha: {fecha}
 Transacción: {payment.transaction_id}
 Pago: {metodo_pago}
 
-Por tu privacidad, no guardamos tus datos personales ni los de tu medio de pago.
+Por tu privacidad, tus datos de contacto se borran al entregar tu pedido; nunca guardamos los de tu tarjeta.
 
 Cafetería Irazú - Cartago, Costa Rica
 Teléfono: 6353-1551
@@ -212,7 +215,7 @@ Fecha: {fecha}
 Transacción: {payment.transaction_id}
 Pago: {metodo_pago}
 {accion_cafe}
-Los datos del cliente solo aparecen en este correo; el sistema no los guarda.
+Los datos del cliente se ven en el panel del negocio hasta entregar el pedido; luego se borran.
 """
 
     envios = [

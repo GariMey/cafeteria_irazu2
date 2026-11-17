@@ -23,5 +23,5 @@ TOTAL PAGADO:      ₡{{ payment.amount|floatformat:0 }}
 
 ¡Gracias por tu compra! Conserva este correo como comprobante.
 Comprobante de compra sin validez fiscal: no sustituye una factura electrónica del Ministerio de Hacienda.
-Por tu privacidad, no conservamos tus datos personales ni los de tu medio de pago.
+Tus datos de contacto se borran al entregar tu pedido; nunca guardamos los de tu tarjeta.
 {% endautoescape %}

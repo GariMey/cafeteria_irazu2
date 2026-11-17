@@ -1,0 +1,81 @@
+<article class="bg-white rounded-2xl shadow-sm border-l-4 p-4 flex flex-col gap-3
+    {% if order.awaiting_sinpe %}border-yellow-400{% elif order.order_status == 'new' %}border-red-400{% elif order.order_status == 'preparing' %}border-latte{% elif order.order_status == 'ready' or order.order_status == 'on_the_way' %}border-verdeClaro{% else %}border-gray-300{% endif %}">
+
+    <!-- Encabezado -->
+    <div class="flex flex-wrap items-start justify-between gap-2">
+        <div>
+            <div class="font-mono text-sm text-espresso/60">{{ order.transaction_id }}</div>
+            <div class="text-xs text-espresso/50">hace {{ order.created_at|timesince }} · {{ order.created_at|date:"d/m H:i" }}</div>
+        </div>
+        <div class="flex flex-wrap gap-1 text-xs font-semibold">
+            <span class="rounded-full px-2.5 py-1 {% if order.is_delivery %}bg-blue-100 text-blue-800{% else %}bg-purple-100 text-purple-800{% endif %}">
+                {% if order.is_delivery %}🛵 Domicilio{% else %}🏪 Recoger{% endif %}
+            </span>
+            <span class="rounded-full px-2.5 py-1 bg-crema">{{ order.get_order_status_display }}</span>
+        </div>
+    </div>
+
+    <!-- Productos -->
+    <ul class="text-sm divide-y divide-crema">
+        {% for item in order.items.all %}
+        <li class="flex justify-between py-1"><span><strong>{{ item.quantity }}×</strong> {{ item.product_name }}</span><span class="text-espresso/60">₡{{ item.get_subtotal|floatformat:0 }}</span></li>
+        {% endfor %}
+    </ul>
+
+    <!-- Pago -->
+    <div class="text-sm flex flex-wrap items-center justify-between gap-2 bg-beige rounded-lg px-3 py-1.5">
+        <span>{{ order.get_payment_method_display }}
+            {% if order.awaiting_sinpe %}<span class="ml-1 text-yellow-800 font-semibold">· SINPE por verificar</span>
+            {% elif order.status == 'completed' %}<span class="ml-1 text-green-700">· pagado</span>
+            {% elif order.status == 'refunded' %}<span class="ml-1 text-espresso/60">· reembolsado</span>
+            {% elif order.status == 'failed' %}<span class="ml-1 text-red-700">· rechazado</span>{% endif %}
+        </span>
+        <strong class="text-lg">₡{{ order.amount|floatformat:0 }}</strong>
+    </div>
+    {% if order.reference %}<div class="text-xs -mt-2">Comprobante SINPE: <span class="font-mono font-semibold">{{ order.reference }}</span></div>{% endif %}
+
+    <!-- Cliente (solo mientras el pedido está activo) -->
+    {% if order.has_contact %}
+    <div class="text-sm space-y-0.5">
+        <div class="font-semibold">{{ order.contact_name }}</div>
+        {% if order.contact_phone %}<div>📞 <a class="underline" href="tel:{{ order.contact_phone|cut:'-' }}">{{ order.contact_phone }}</a>
+            · <a class="underline" target="_blank" rel="noopener" href="https://wa.me/506{{ order.contact_phone|cut:'-' }}">WhatsApp</a></div>{% endif %}
+        {% if order.contact_email %}<div>✉️ <a class="underline" href="mailto:{{ order.contact_email }}">{{ order.contact_email }}</a></div>{% endif %}
+        {% if order.delivery_address %}<div class="mt-1 rounded-lg bg-blue-50 px-3 py-2">📍 {{ order.delivery_address }}{% if order.delivery_notes %}<br><span class="text-espresso/60">{{ order.delivery_notes }}</span>{% endif %}</div>{% endif %}
+    </div>
+    {% elif order.is_active_order %}
+    <div class="text-xs text-espresso/50">Sin datos de contacto.</div>
+    {% else %}
+    <div class="text-xs text-espresso/40">🛡️ Datos del cliente borrados al cerrar el pedido.</div>
+    {% endif %}
+
+    <!-- Acciones -->
+    {% if order.is_active_order %}
+    <div class="flex flex-wrap gap-2 pt-1">
+        {% if order.awaiting_sinpe %}
+        <form method="post" action="{% url 'panel:order_action' order.pk %}">{% csrf_token %}
+            <input type="hidden" name="action" value="confirm_sinpe">
+            <button class="rounded-lg bg-green-600 text-white px-3 py-1.5 text-sm font-semibold hover:bg-green-700">✅ Confirmar SINPE</button>
+        </form>
+        <form method="post" action="{% url 'panel:order_action' order.pk %}" onsubmit="return confirm('¿Rechazar el SINPE? Se cancelará el pedido y se avisará al cliente.')">{% csrf_token %}
+            <input type="hidden" name="action" value="reject_sinpe">
+            <button class="rounded-lg bg-red-100 text-red-800 px-3 py-1.5 text-sm font-semibold hover:bg-red-200">❌ Rechazar SINPE</button>
+        </form>
+        {% else %}
+        {% for next in order.next_order_statuses %}
+        <form method="post" action="{% url 'panel:order_action' order.pk %}" class="flex-1">{% csrf_token %}
+            <input type="hidden" name="action" value="advance">
+            <input type="hidden" name="to" value="{{ next }}">
+            <button class="w-full rounded-lg bg-espresso text-crema px-3 py-1.5 text-sm font-semibold hover:bg-cafe">
+                {% if next == 'preparing' %}👩‍🍳 Empezar a preparar{% elif next == 'ready' %}🔔 Listo para recoger{% elif next == 'on_the_way' %}🛵 Enviar (en camino){% else %}✔️ Marcar entregado{% endif %}
+            </button>
+        </form>
+        {% endfor %}
+        <form method="post" action="{% url 'panel:order_action' order.pk %}" onsubmit="return confirm('¿Cancelar este pedido?')">{% csrf_token %}
+            <input type="hidden" name="action" value="cancel">
+            <button class="rounded-lg border border-red-300 text-red-700 px-3 py-1.5 text-sm hover:bg-red-50">Cancelar</button>
+        </form>
+        {% endif %}
+    </div>
+    {% endif %}
+</article>

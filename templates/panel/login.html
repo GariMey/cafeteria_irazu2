@@ -1,0 +1,35 @@
+{% extends 'panel/base.html' %}
+
+{% block title %}Entrar{% endblock %}
+
+{% block content %}
+<div class="min-h-[70vh] flex items-center justify-center">
+    <div class="w-full max-w-sm bg-white rounded-2xl shadow-xl p-8">
+        <div class="text-center mb-6">
+            <div class="text-5xl mb-2">☕</div>
+            <h1 class="font-display text-3xl">Panel del negocio</h1>
+            <p class="text-sm text-espresso/60">Cafetería Irazú · solo personal autorizado</p>
+        </div>
+
+        {% for error in form.non_field_errors %}
+        <div class="mb-4 rounded-lg bg-red-100 text-red-800 text-sm px-3 py-2">{{ error }}</div>
+        {% endfor %}
+
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ next }}">
+            <div>
+                <label for="id_username" class="block text-sm mb-1">Usuario</label>
+                <input type="text" name="username" id="id_username" required autofocus autocomplete="username"
+                       class="w-full rounded-lg border border-latte/40 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-latte">
+            </div>
+            <div>
+                <label for="id_password" class="block text-sm mb-1">Contraseña</label>
+                <input type="password" name="password" id="id_password" required autocomplete="current-password"
+                       class="w-full rounded-lg border border-latte/40 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-latte">
+            </div>
+            <button class="w-full bg-espresso text-crema rounded-lg py-2.5 font-semibold hover:bg-cafe">Entrar</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

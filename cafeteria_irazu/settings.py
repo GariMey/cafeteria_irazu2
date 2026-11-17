@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'bookings',
     'newsletter',
     'payments',
+    'panel',
 ]
 
 MIDDLEWARE = [
@@ -106,6 +107,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # PEDIDOS
 IVA_RATE = '0.13'        # IVA de Costa Rica (13 %)
 DELIVERY_FEE = '1500'    # Costo de envío a domicilio en colones
+ORDER_CONTACT_RETENTION_DAYS = 7  # Respaldo: borra el contacto de pedidos abiertos más tiempo
 
 # MÉTODOS DE PAGO
 SINPE_NUMBER = config('SINPE_NUMBER', default='6353-1551')         # Número que recibe los SINPE

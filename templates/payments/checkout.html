@@ -104,7 +104,7 @@
                                     <li>A nombre de <strong>{{ sinpe_holder }}</strong>.</li>
                                     <li>Escribe abajo el número de comprobante que te da el banco.</li>
                                 </ol>
-                                <p class="text-crema/50 text-xs">Tu pedido quedará pendiente y lo confirmaremos en cuanto veamos el depósito. Guardaremos tu nombre y correo solo hasta enviarte la factura; después se borran.</p>
+                                <p class="text-crema/50 text-xs">Tu pedido quedará pendiente y lo confirmaremos en cuanto veamos el depósito.</p>
                             </div>
                             {% include 'payments/_field.html' with field=form.sinpe_reference %}
                         </div>
@@ -169,7 +169,7 @@
 
                 <div class="mt-6 pt-4 border-t border-latte/20 space-y-2 text-xs">
                     <div class="flex items-center gap-3 text-crema/50"><span>🔒</span><span>No guardamos los datos de tu tarjeta</span></div>
-                    <div class="flex items-center gap-3 text-crema/50"><span>🛡️</span><span>Tu nombre, teléfono, correo y dirección solo se usan para este pedido y no se almacenan</span></div>
+                    <div class="flex items-center gap-3 text-crema/50"><span>🛡️</span><span>Tu nombre, teléfono, correo y dirección solo se usan para este pedido y se borran al entregarlo</span></div>
                 </div>
             </div>
         </div>

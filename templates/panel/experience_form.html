@@ -1,0 +1,87 @@
+{% extends 'panel/base.html' %}
+
+{% block title %}{% if feature %}Editar {{ feature.title }}{% else %}Nueva tarjeta{% endif %}{% endblock %}
+
+{% block content %}
+<a href="{% url 'panel:experience' %}" class="text-sm text-mocha hover:underline">← Volver a La Experiencia</a>
+<h1 class="font-display text-3xl mt-1 mb-4">{% if feature %}Editar «{{ feature.title }}»{% else %}Nueva tarjeta{% endif %}</h1>
+
+<div class="grid gap-6 lg:grid-cols-3">
+    <form method="post" enctype="multipart/form-data" class="lg:col-span-2 bg-white rounded-2xl shadow-sm p-5 space-y-4" id="feature-form">
+        {% csrf_token %}
+        <div class="grid gap-4 sm:grid-cols-2">
+        {% for field in form %}
+        <div class="{% if field.name == 'description' or field.name == 'image' %}sm:col-span-2{% endif %}">
+            {% if field.field.widget.input_type == 'checkbox' %}
+            <label class="flex items-start gap-3 cursor-pointer">
+                {{ field }}
+                <span><span class="font-semibold">{{ field.label }}</span>
+                {% if field.help_text %}<span class="block text-xs text-espresso/60">{{ field.help_text }}</span>{% endif %}</span>
+            </label>
+            {% else %}
+            <label for="{{ field.id_for_label }}" class="block text-sm font-semibold mb-1">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}<p class="text-xs text-espresso/60 mt-1">{{ field.help_text }}</p>{% endif %}
+            {% endif %}
+            {% for error in field.errors %}<p class="text-xs text-red-700 mt-1">{{ error }}</p>{% endfor %}
+        </div>
+        {% endfor %}
+        </div>
+        <div class="flex gap-3 pt-2">
+            <button class="rounded-lg bg-espresso text-crema px-5 py-2 font-semibold hover:bg-cafe">Guardar</button>
+            <a href="{% url 'panel:experience' %}" class="rounded-lg border border-latte/40 px-5 py-2">Cancelar</a>
+        </div>
+    </form>
+
+    <aside class="space-y-4">
+        <!-- Vista previa con el estilo del sitio -->
+        <div>
+            <div class="text-sm font-semibold mb-2">Vista previa</div>
+            <div class="bg-verde rounded-2xl p-4">
+                <div class="bg-white/10 rounded-2xl overflow-hidden border border-white/20 text-crema">
+                    <div class="aspect-[16/10] bg-white/5 overflow-hidden {% if not feature.image_url %}hidden{% endif %}" id="preview-image-wrap">
+                        <img id="preview-image" src="{{ feature.image_url|default:'' }}" alt="" class="w-full h-full object-cover">
+                    </div>
+                    <div class="p-6">
+                        <h3 class="font-display text-xl mb-2 flex items-center gap-2"><span id="preview-icon" class="text-2xl">{{ feature.icon }}</span><span id="preview-title">{{ feature.title|default:'Título' }}</span></h3>
+                        <p id="preview-text" class="text-sm text-crema/70">{{ feature.description|default:'Descripción de la tarjeta.' }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if feature %}
+        <form method="post" action="{% url 'panel:experience_delete' feature.pk %}" class="bg-white rounded-2xl shadow-sm p-4"
+              onsubmit="return confirm('¿Eliminar la tarjeta «{{ feature.title|escapejs }}»?')">
+            {% csrf_token %}
+            <div class="text-sm font-semibold mb-1">Eliminar tarjeta</div>
+            <p class="text-xs text-espresso/60 mb-3">Si solo quieres ocultarla un tiempo, desmarca «Visible».</p>
+            <button class="w-full rounded-lg border border-red-300 text-red-700 px-4 py-2 text-sm hover:bg-red-50">Eliminar</button>
+        </form>
+        {% endif %}
+    </aside>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+    const bind = (inputId, previewId, fallback) => {
+        const input = document.getElementById(inputId);
+        const preview = document.getElementById(previewId);
+        if (!input || !preview) return;
+        input.addEventListener('input', () => { preview.textContent = input.value || fallback; });
+    };
+    bind('id_title', 'preview-title', 'Título');
+    bind('id_description', 'preview-text', 'Descripción de la tarjeta.');
+    bind('id_icon', 'preview-icon', '');
+
+    const file = document.getElementById('id_image');
+    file?.addEventListener('change', () => {
+        if (!file.files[0]) return;
+        document.getElementById('preview-image').src = URL.createObjectURL(file.files[0]);
+        document.getElementById('preview-image-wrap').classList.remove('hidden');
+    });
+})();
+</script>
+{% endblock %}

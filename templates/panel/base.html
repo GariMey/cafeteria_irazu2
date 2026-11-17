@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>{% block title %}Panel{% endblock %} — Cafetería Irazú</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: { extend: {
+          colors: { espresso: '#1a0f00', cafe: '#3d1f00', mocha: '#6b3a1f', latte: '#c4956a',
+                    crema: '#f5e6d3', beige: '#fdf6ee', verde: '#2d4a2d', verdeClaro: '#4a7c59', madera: '#8b5e3c' },
+          fontFamily: { display: ['"Cormorant Garamond"', 'serif'], body: ['Jost', 'sans-serif'] },
+        } }
+      }
+    </script>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-beige font-body text-espresso min-h-screen">
+    {% if user.is_authenticated and user.is_staff %}
+    <header class="bg-espresso text-crema sticky top-0 z-30 shadow-lg">
+        <!-- Una sola fila en pantallas grandes; en pantallas pequeñas las secciones bajan a una segunda fila -->
+        <div class="max-w-[1600px] mx-auto px-4 lg:px-6 flex flex-wrap lg:flex-nowrap items-center gap-x-4 gap-y-2 py-2">
+            <a href="{% url 'panel:orders' %}" class="flex items-center gap-2 whitespace-nowrap">
+                <span class="text-xl" aria-hidden="true">☕</span>
+                <span class="font-display text-xl">Panel Irazú</span>
+            </a>
+
+            <nav aria-label="Secciones del panel"
+                 class="order-last w-full lg:order-none lg:w-auto lg:flex-1 flex gap-1.5 overflow-x-auto lg:justify-center pb-1 lg:pb-0">
+                {% url 'panel:orders' as u %}{% include 'panel/_nav_item.html' with url=u key='orders' label='Pedidos' badge=counters.new_orders %}
+                {% url 'panel:products' as u %}{% include 'panel/_nav_item.html' with url=u key='products' label='Productos' badge=0 %}
+                {% url 'panel:gallery' as u %}{% include 'panel/_nav_item.html' with url=u key='gallery' label='Galería' badge=0 %}
+                {% url 'panel:experience' as u %}{% include 'panel/_nav_item.html' with url=u key='experience' label='Experiencia' badge=0 %}
+                {% url 'panel:inbox' as u %}{% include 'panel/_nav_item.html' with url=u key='inbox' label='Mensajes' badge=counters.unread_messages %}
+            </nav>
+
+            <div class="ml-auto lg:ml-0 flex items-center gap-1.5 text-sm">
+                <a href="{% url 'home' %}" target="_blank" rel="noopener" title="Ver sitio"
+                   class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-crema/80 hover:bg-white/10 hover:text-crema">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M14 4h6v6m0-6L10 14M18 13v5a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2h5"/></svg>
+                    <span class="hidden xl:inline">Ver sitio</span>
+                </a>
+                <span class="hidden sm:flex h-7 w-7 items-center justify-center rounded-full bg-latte text-espresso text-xs font-bold uppercase"
+                      title="{{ user.get_username }}">{{ user.get_username|slice:":1" }}</span>
+                <form method="post" action="{% url 'panel:logout' %}">
+                    {% csrf_token %}
+                    <button class="inline-flex items-center gap-1.5 rounded-lg border border-crema/40 px-2.5 py-1.5 font-semibold hover:bg-crema hover:text-espresso transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17l5-5-5-5m5 5H9m4 9H6a2 2 0 01-2-2V5a2 2 0 012-2h7"/></svg>
+                        Salir
+                    </button>
+                </form>
+            </div>
+        </div>
+    </header>
+    {% endif %}
+
+    {% if messages %}
+    <div class="max-w-[1600px] mx-auto px-4 lg:px-6 pt-3 space-y-2" id="panel-messages">
+        {% for message in messages %}
+        <div class="rounded-lg px-4 py-2 text-sm flex items-start gap-3
+            {% if message.tags == 'error' %}bg-red-100 text-red-800{% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-900{% else %}bg-green-100 text-green-900{% endif %}">
+            <span class="flex-1">{{ message }}</span>
+            <button type="button" onclick="this.parentElement.remove()" aria-label="Cerrar">✕</button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <main class="max-w-[1600px] mx-auto px-4 lg:px-6 py-4">
+        {% block content %}{% endblock %}
+    </main>
+    <script>
+    // Los avisos verdes desaparecen solos; los de error se quedan hasta cerrarlos
+    setTimeout(() => document.querySelectorAll('#panel-messages > .bg-green-100').forEach(el => el.remove()), 6000);
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
