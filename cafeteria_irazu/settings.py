@@ -153,14 +153,22 @@ SINPE_HOLDER = config('SINPE_HOLDER', default='Cafetería Irazú')   # Nombre de
 # Google Pay en entorno de prueba: abre la ventana real pero nunca cobra
 GOOGLE_PAY_ENVIRONMENT = 'TEST'
 
-# CORREO: Gmail (contraseña de aplicación) > SendGrid > consola
+# CORREO: Brevo (API HTTPS) > Gmail (SMTP) > SendGrid > consola
+# En Render gratis el SMTP está bloqueado: allí se usa Brevo (BREVO_API_KEY).
+BREVO_API_KEY = config('BREVO_API_KEY', default='')
 GMAIL_APP_PASSWORD = config('GMAIL_APP_PASSWORD', default='')
 SENDGRID_API_KEY = config('SENDGRID_API_KEY', default='')
 # Si el servidor de correo no responde, se corta a los 10 s en vez de colgar
 # la petición (en Render eso provocaba "worker timeout").
 EMAIL_TIMEOUT = 10
 
-if GMAIL_APP_PASSWORD:
+if BREVO_API_KEY:
+    EMAIL_BACKEND = 'cafeteria_irazu.email_backends.BrevoEmailBackend'
+    # Debe ser un remitente verificado en Brevo (Senders & IPs)
+    EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='cuaderno.melanygr@gmail.com')
+    DEFAULT_FROM_EMAIL = f'Cafetería Irazú <{EMAIL_HOST_USER}>'
+    CAFE_EMAIL = EMAIL_HOST_USER
+elif GMAIL_APP_PASSWORD:
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
     EMAIL_HOST = 'smtp.gmail.com'
     EMAIL_PORT = 587
