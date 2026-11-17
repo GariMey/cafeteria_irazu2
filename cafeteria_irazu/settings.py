@@ -3,6 +3,7 @@ from pathlib import Path
 
 import dj_database_url
 from decouple import config
+from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -83,12 +84,16 @@ TEMPLATES = [
 WSGI_APPLICATION = 'cafeteria_irazu.wsgi.application'
 
 # BASE DE DATOS: PostgreSQL en Render (DATABASE_URL) o SQLite en local
-DATABASES = {
-    'default': dj_database_url.config(
-        default=config('DATABASE_URL', default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}"),
-        conn_max_age=600,
+# Se limpian espacios y comillas que suelen colarse al copiar la URL.
+DATABASE_URL = config('DATABASE_URL', default='').strip().strip('"\'').strip()
+if not DATABASE_URL:
+    DATABASE_URL = f"sqlite:///{BASE_DIR / 'db.sqlite3'}"
+elif not DATABASE_URL.split('://', 1)[0].isalpha():
+    raise ImproperlyConfigured(
+        "DATABASE_URL no es válida: debe ser la URL completa de la base de datos, "
+        "que empieza con postgresql:// (en Render: Internal Database URL)."
     )
-}
+DATABASES = {'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)}
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
